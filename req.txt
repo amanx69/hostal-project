@@ -10,3 +10,9 @@ psycopg2-binary==2.9.10
 PyJWT==2.10.1
 sqlparse==0.5.3
 tzdata==2025.2
+
+
+
+user 1 token 
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4OTIyNDE2LCJpYXQiOjE3NjAyODI0MTYsImp0aSI6IjM0MDVmYjUyYWNhNTQ3ZWM4ODA4NGZkZWRkMjVmMjQ4IiwidXNlcl9pZCI6IjE3In0.hbmz59d_MWIvblWy_MfcqVbXzFnGmtv2CvMgiHJN2V4

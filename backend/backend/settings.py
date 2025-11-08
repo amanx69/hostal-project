@@ -35,8 +35,8 @@ AUTH_USER_MODEL = "users.User"  # custom user model
 # Application definition
 
 INSTALLED_APPS = [
-    "daphne",
     "django.contrib.admin",
+    "daphne",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'channels',
     'post',
     'LoginDetiles',
+    'chats',
+    'Home',
 ]
 
 MIDDLEWARE = [
@@ -84,15 +86,16 @@ WSGI_APPLICATION = "backend.wsgi.application"
 ASGI_APPLICATION = "backend.asgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        }
+    },
+}
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
+
 
 DATABASES = {
     'default': {

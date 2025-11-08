@@ -50,13 +50,6 @@ class Signup(APIView):
             })
         return Response(ser.errors,status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
-
-
-
-
 #! Login view
 
 class Login(APIView):
@@ -85,3 +78,14 @@ class Login(APIView):
             
         })
         
+        
+        
+        
+        
+class alluser(APIView):
+    def get(self,request):
+        users= User.objects.all()
+        ser= UserSerializer(users,many=True)
+        return Response({
+            "users":ser.data
+        })        

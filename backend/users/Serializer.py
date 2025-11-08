@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Password must contain at least one digit.")
         if not re.search(r"[A-Z]", value):
             raise serializers.ValidationError("Password must contain at least one uppercase letter.")
-        return value  # ✅ must return the value if it's valid
+        return value  
 
     def validate_email(self, value):
         if not value or value.strip() == "":

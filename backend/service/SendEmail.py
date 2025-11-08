@@ -13,6 +13,3 @@ def SendWelcomeEmail(user):
             recipient_list = [user.email]
 
             send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-
-    
-   
