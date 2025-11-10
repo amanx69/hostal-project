@@ -78,6 +78,7 @@ class Sendmessage(APIView):
          return  Response({
             "message":"Message  sent  successfully",
             "msgdata": ser.data,
+          
          }, status=status.HTTP_201_CREATED
          )
      

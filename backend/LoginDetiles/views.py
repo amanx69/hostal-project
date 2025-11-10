@@ -4,6 +4,7 @@ from rest_framework import status
 from .Serlializer import ProfileOrBioSerializer
 from users.models import User
 from django.shortcuts import get_object_or_404  
+from rest_framework.decorators import api_view
 # Create your views here.
 
 

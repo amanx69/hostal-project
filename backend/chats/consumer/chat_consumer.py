@@ -30,8 +30,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.groupe_name,
             self.channel_name
         )
+        await  create_chatroom(self.user.id,self.user2) #! create chatroom if not exit
            
         await self.accept()
+        
         
         #! create  a chat if not  exit
         
@@ -54,7 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         
         #! save massage in  db  
-      #  await self.save_message(sender_id,room_id,msg)
+       # await self.save_message(sender_id,room_id,msg)
        
         
         await self.channel_layer.group_send(
@@ -75,12 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
-        
-        
-        
 
-
-    
     
 #! functions for  ave  massage  in db 
 
@@ -99,9 +96,9 @@ def save_message(room_id,sender_id,msg):
     )
 
 
-    @database_sync_to_async
+@database_sync_to_async
 #! function  for  create  chatroom  if  not  exit
-    def create_chatroom(user,user2):
+def create_chatroom(user,user2):
         user1=  get_object_or_404(User,id= user)
         user2=  get_object_or_404(User,id= user2)
         if user1.id== user2.id:

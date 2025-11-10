@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ profile.user.username }}'s Profile</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f5f6fa;
+      text-align: center;
+      padding: 30px;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      width: 350px;
+      margin: 0 auto;
+      border-radius: 15px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    img {
+      border-radius: 50;
+      width: 100px;
+      height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="{{ profile.profile_pic.url }}" alt="Profile Pic">
+    <h2>{{ profile.user.username }}</h2>
+    <p><b>Email:</b> {{ profile.user.username }}</p>
+    <p><b>Bio:</b> {{ profile.bio }}</p>
+  
+  </div>
+</body>
+</html>

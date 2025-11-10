@@ -17,6 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -24,5 +26,11 @@ urlpatterns = [
      # new
     path("Logind/", include("LoginDetiles.urls")),  # new
     path("posts/", include("post.urls")),
-    path("chats/",include("chats.urls")),  # new
+    path("chats/",include("chats.urls")), 
+    path("pro/",include("Profile.urls")),  
 ]
+if settings.DEBUG: 
+    from django.conf import settings
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at']
 
-   
+
     def create(self, validated_data):
         email = validated_data.get('email')
         password = validated_data.pop('password', None)
@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user( password=password, **validated_data)
         return user
 
-  
+
     def validate_password(self, value):
         if len(value) < 8:
             raise serializers.ValidationError("Password must be at least 8 characters long.")

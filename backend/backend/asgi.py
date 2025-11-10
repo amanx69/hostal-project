@@ -14,6 +14,7 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from chats.consumer.chat_consumer import ChatConsumer
+from chats.consumer.groupe_consumer import groupeConsumer
 from  django.urls import  re_path
 from chats.CustomMidwereForJwt import JWTAuthMiddleware
 
@@ -28,6 +29,7 @@ application = ProtocolTypeRouter({
             [
                 
             re_path(r'ws/chat/(?P<user2_id>\w+)/(?P<room_id>\w+)/$', ChatConsumer.as_asgi()),
+            re_path(r'ws/chat/(?P<groupe_name>\w+)/$', groupeConsumer.as_asgi()),
            
                 
             ]
