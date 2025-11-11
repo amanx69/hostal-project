@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-
-
+from users.models import User
+from  users.Serializer import UserSerializer
 
 
 @api_view(['POST'])
@@ -26,9 +26,133 @@ def create_groupe(request):
         groupe_name= Groupe_name,
         owner= request.user,
     )
+    groupe.members.add(request.user)
     return Response({
         "message":"Groupe created successfully",
         "groupe_id": groupe.id,
         "groupe_name": groupe.groupe_name,
         "ownner": groupe.owner.username
     })
+    
+    
+    
+    
+    
+#! add the  user  in the  groupe  
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+
+def add_memeber(request,groupe_id):
+    
+    
+    
+    users:list= request.data.get("users",[])
+    
+    #! these  code  only  for add  one  person in groupe
+    if not users:
+        return Response({
+            "error":"User list is required."
+        },status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        groupe= GroupeChatModel.GroupesChat.objects.get(id= groupe_id)
+    except GroupeChatModel.GroupesChat.DoesNotExist:
+        return Response({
+            "error":"Groupe not found."
+        },status=status.HTTP_404_NOT_FOUND)
+        
+    #! if  user in groupe  than add  memebr  in groupe
+    if request.user == groupe.owner or request.user in groupe.members.all():
+        
+        
+        if len(users)==1:
+            
+            user= users[0]
+         
+            try:
+                adduser= User.objects.get(id= user)
+                
+            except User.DoesNotExist:
+                return Response({
+                    "error":"User not found."
+                },status=status.HTTP_404_NOT_FOUND)
+                #! if user already  in groupe
+            if adduser in groupe.members.all():
+                
+                return Response({
+                    "error":"user already in groupe"
+                },status=status.HTTP_400_BAD_REQUEST)
+                
+                
+
+            groupe.members.add(adduser)#! add  in groupe member
+            groupe.save()
+            
+            return Response({
+                "message": f"user{request.user.username} add in {adduser.username} in {groupe.groupe_name}"  })
+            
+        else:
+            
+        #! these  code  for  add multiple  user  in  one  time
+            if len(users)>1:
+            
+                for user_id in users:
+                    
+                    
+                    try:
+                        adduser= User.objects.get(id= user_id)
+                 
+                    except User.DoesNotExist:
+                        return Response({
+                            "error":f"User{adduser.username} not found."
+                        },status=status.HTTP_404_NOT_FOUND)
+                        #! if user already  in groupe
+                    if adduser in groupe.members.all():
+                        
+                        return Response({
+                            "error":f"user {adduser.username} already in groupe"
+                        })
+                        
+                
+                    groupe.members.add(adduser)#! add  in groupe member
+                  
+            
+            groupe.save()
+            added_users = [user.username for user in groupe.members.all()]
+            return Response({
+                "message": f"user{request.user.username} add in {added_users} in {groupe.groupe_name}"
+            })     
+
+
+#! remove  user  the  user  
+
+
+@api_view(['PATCH'])
+
+def remove(requets,id,g_id):
+    
+    groupe= GroupeChatModel.GroupesChat.objects.get(id= g_id)
+    
+    user= User.objects.get(id= id)
+    groupe.members.remove(user)
+    return Response({
+        
+        "message":f"user {user.username} remove from {groupe.groupe_name}"
+    })
+    
+
+
+
+
+@api_view(['GET'])
+def member(request,g_id):
+    
+    
+    groupe= GroupeChatModel.GroupesChat.objects.get(id= g_id)
+    mem= groupe.members.all()
+    ser= UserSerializer(mem,many=True)
+    return Response({
+        "memebr":ser.data,
+    })
+    
+

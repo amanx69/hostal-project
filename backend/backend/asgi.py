@@ -28,8 +28,8 @@ application = ProtocolTypeRouter({
         URLRouter(
             [
                 
-            re_path(r'ws/chat/(?P<user2_id>\w+)/(?P<room_id>\w+)/$', ChatConsumer.as_asgi()),
-            re_path(r'ws/chat/(?P<groupe_name>\w+)/$', groupeConsumer.as_asgi()),
+            re_path(r'ws/chat/(?P<chat_id>\w+)/$', ChatConsumer.as_asgi()),
+            re_path(r'ws/chat/groupe/(?P<groupe_id>\w+)/$', groupeConsumer.as_asgi()),
            
                 
             ]
