@@ -4,7 +4,7 @@ from users.models import  User
 
 class GroupesChat(models.Model):
     
-    groupe_name= models.CharField(max_length=100,blank=False)
+    groupe_name= models.CharField(max_length=100,blank=False,null=False)
     groupe_description= models.TextField()
     created_at= models.DateTimeField(auto_now_add=True)
     owner= models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_groupes')

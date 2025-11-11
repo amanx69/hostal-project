@@ -44,7 +44,8 @@ def create_groupe(request):
 
 def add_memeber(request,groupe_id):
     
-    
+    not_found_user=[]
+    already_in_groupe=[]
     
     users:list= request.data.get("users",[])
     
@@ -65,6 +66,9 @@ def add_memeber(request,groupe_id):
     if request.user == groupe.owner or request.user in groupe.members.all():
         
         
+        
+        
+        
         if len(users)==1:
             
             user= users[0]
@@ -73,6 +77,7 @@ def add_memeber(request,groupe_id):
                 adduser= User.objects.get(id= user)
                 
             except User.DoesNotExist:
+            
                 return Response({
                     "error":"User not found."
                 },status=status.HTTP_404_NOT_FOUND)
@@ -98,48 +103,33 @@ def add_memeber(request,groupe_id):
             
                 for user_id in users:
                     
-                    
                     try:
                         adduser= User.objects.get(id= user_id)
-                 
                     except User.DoesNotExist:
-                        return Response({
-                            "error":f"User{adduser.username} not found."
-                        },status=status.HTTP_404_NOT_FOUND)
+                        not_found_user.append(user_id)
+                        
                         #! if user already  in groupe
                     if adduser in groupe.members.all():
-                        
-                        return Response({
-                            "error":f"user {adduser.username} already in groupe"
-                        })
+                        already_in_groupe.append(adduser.username)
+                        continue
+                    
+                
                         
                 
                     groupe.members.add(adduser)#! add  in groupe member
-                  
+                
             
             groupe.save()
             added_users = [user.username for user in groupe.members.all()]
             return Response({
+                "not_found_user":not_found_user,
+                "already in groupe":already_in_groupe,
                 "message": f"user{request.user.username} add in {added_users} in {groupe.groupe_name}"
             })     
 
 
 #! remove  user  the  user  
 
-
-@api_view(['PATCH'])
-
-def remove(requets,id,g_id):
-    
-    groupe= GroupeChatModel.GroupesChat.objects.get(id= g_id)
-    
-    user= User.objects.get(id= id)
-    groupe.members.remove(user)
-    return Response({
-        
-        "message":f"user {user.username} remove from {groupe.groupe_name}"
-    })
-    
 
 
 
