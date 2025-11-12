@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'LoginDetiles',
     'chats',
     'Home',
+    'complains',
 ]
 
 MIDDLEWARE = [

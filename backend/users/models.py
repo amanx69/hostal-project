@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
  ##!Custom User Model
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True,blank=False)   # used for login
-    username = models.CharField(max_length=100,blank=False,)
+    username = models.CharField(max_length=100,blank= True,)
     phone = models.CharField(max_length=15, blank=True, null=True)
     bio=models.TextField(blank=True,max_length=50)
     profile_pic = models.ImageField(upload_to="profile_images/", null=True, blank=True)

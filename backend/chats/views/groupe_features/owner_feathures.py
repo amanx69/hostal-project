@@ -7,11 +7,12 @@ from  users.Serializer import UserSerializer
 from chats.Models import GroupeChatModel
 from rest_framework.views import APIView
 from chats.serializers.groupeser import groupeserializer
+from service.custom_permissions import  Isowner
 
 
 #! remove  users in  groupe  by only  owner  
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([Isowner])
 def remove_member(request,g_id):
     
     users = request.data.get("users", [])
@@ -68,8 +69,14 @@ def remove_member(request,g_id):
 
 
 @api_view(['PATCH'])
+@permission_classes([Isowner])
 
 def update_name_profile(request,g_id):
+    if not request.data.get("groupe_name"):
+         return Response({
+             "error":"groupe name is required"
+         })
+    
     
     try:
         groupe= GroupeChatModel.GroupesChat.objects.get(id=g_id)
@@ -86,6 +93,7 @@ def update_name_profile(request,g_id):
         return Response({
             "message":"update done",
             "stutas":status.HTTP_200_OK,
+            "data":ser.data,
             
             
         })
@@ -94,4 +102,48 @@ def update_name_profile(request,g_id):
 
 
 #! deleted the groupe
-#! change the owner of groupe
+@api_view(['DELETE'])
+@permission_classes([Isowner])
+
+def delete_groupe(request,g_id):
+
+    try:
+        groupe= GroupeChatModel.GroupesChat.objects.get(id=g_id)
+    except  GroupeChatModel.GroupesChat.DoesNotExist:
+        return Response({
+            "error":"groupe dont found"
+        })
+        
+    if request.user== groupe.owner:
+        groupe.delete()
+        return Response({
+            "message":"groupe deleted",
+            "status":status.HTTP_200_OK
+        })
+    else:
+        return Response({
+            "error":"you are not owner of this group"
+        })
+
+#! give all memebr  of groupe
+
+@api_view(['GET'])
+@permission_classes([Isowner])
+def all_groupe_member(request,g_id):
+    
+    
+    groupe= GroupeChatModel.GroupesChat.objects.get(id= g_id)
+    mem= groupe.members.all()
+    ser= UserSerializer(mem,many=True)
+    return Response({
+        "memebr":ser.data,
+    })
+    
+    
+    
+    
+#! make  if user want  to add in the groupe  tha show request list  of users
+class request_to_add_groupe(APIView):
+    pass
+    
+

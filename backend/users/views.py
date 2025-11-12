@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed
 from  service.SendEmail import SendWelcomeEmail
 from django.contrib.auth import authenticate
+from datetime import datetime
 
 #! FOR  TOKEN  gerneted
 def get_token(user):
@@ -62,6 +63,8 @@ class Login(APIView):
             },status=status.HTTP_400_BAD_REQUEST)
             
         user= authenticate(email=email,password=password)
+        user.last_login= datetime.now()
+        user.save()
         if not user:
             return Response({
                 "error":"Invalid email or password"

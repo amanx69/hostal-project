@@ -134,15 +134,4 @@ def add_memeber(request,groupe_id):
 
 
 
-@api_view(['GET'])
-def member(request,g_id):
-    
-    
-    groupe= GroupeChatModel.GroupesChat.objects.get(id= g_id)
-    mem= groupe.members.all()
-    ser= UserSerializer(mem,many=True)
-    return Response({
-        "memebr":ser.data,
-    })
-    
 
