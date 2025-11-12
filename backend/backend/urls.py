@@ -28,6 +28,7 @@ urlpatterns = [
     path("posts/", include("post.urls")),
     path("chats/",include("chats.urls")), 
     path("pro/",include("Profile.urls")),  
+    path("comp/",include("complains.urls")),
 ]
 if settings.DEBUG: 
     from django.conf import settings
