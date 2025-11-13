@@ -68,12 +68,7 @@ def  qr_code(request, g_id:int):
     
    
     
-    return Response({
-        "qr_code":"qrcode.png",
-        
-    })
-    
-    
+   
     
     
     

@@ -32,6 +32,7 @@ def leave_groupe(request,g_id):
         
         return Response({
             "message":"leave done",
+            "leaved_user":request.user.username,
             "join_at":leave_user.joined_at,
             "leave_at":leave_user.leave_at,
             "status":status.HTTP_200_OK

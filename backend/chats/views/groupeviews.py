@@ -128,8 +128,6 @@ def add_memeber(request,groupe_id):
             })     
 
 
-#! remove  user  the  user  
-
 
 
 
