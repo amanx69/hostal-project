@@ -1,17 +1,24 @@
 from chats.Models import GroupeChatModel
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from users.models import User
 from  users.Serializer import UserSerializer
+from  drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
+
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
 
 def create_groupe(request):
     Groupe_name= request.data.get("groupe_name")
+    image = request.FILES.get('profile_image')
+    
     if not Groupe_name or Groupe_name.strip() == "":
         return Response({
             "error":"Groupe name cannot be empty."
@@ -25,6 +32,7 @@ def create_groupe(request):
     groupe= GroupeChatModel.GroupesChat.objects.create(
         groupe_name= Groupe_name,
         owner= request.user,
+        groupe_profile_image= image or None
     )
     groupe.members.add(request.user)
     return Response({
@@ -94,7 +102,7 @@ def add_memeber(request,groupe_id):
             groupe.save()
             
             return Response({
-                "message": f"user{request.user.username} add in {adduser.username} in {groupe.groupe_name}"  })
+                "message": f"user{request.user.username} add in {adduser.username} in {groupe.groupe_name}" })
             
         else:
             

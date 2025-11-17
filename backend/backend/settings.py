@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
+    #! fro  testing
+    'drf_yasg',
+    #! third  party
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
@@ -199,3 +203,16 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'anujaman56@gmail.com'
 EMAIL_HOST_PASSWORD = 'oonp crms fhgv sfsn'
+
+
+
+#!  ui for swagger
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}

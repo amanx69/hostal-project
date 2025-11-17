@@ -7,11 +7,11 @@ urlpatterns = [
     path("<int:room_id>/send-message/", chatviews.Sendmessage.as_view(), name='send_message'),
 
 
-    path("create_groupe/", groupeviews.create_groupe, name='create_groupe'),
-    path("<int:groupe_id>/add_users/", groupeviews.add_memeber, name='add_member'),
     
     
     #! groupe 
+    path("create_groupe/", groupeviews.create_groupe, name='create_groupe'),
+    path("<int:groupe_id>/add_users/", groupeviews.add_memeber, name='add_member'),
     path("<int:g_id>/qr_code/", Groupe_features.qr_code, name='qr_code'),
     
     

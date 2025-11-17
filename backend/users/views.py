@@ -10,7 +10,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from  service.SendEmail import SendWelcomeEmail
 from django.contrib.auth import authenticate
 from datetime import datetime
-
+from  drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 #! FOR  TOKEN  gerneted
 def get_token(user):
     if not user.is_active:
@@ -26,6 +27,19 @@ def get_token(user):
 
 
 class Signup(APIView):
+    
+    @swagger_auto_schema(
+        operation_description="User login using email and password",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='User Email'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User Password'),
+            },
+            required=['email', 'password']
+        ),
+        responses={200: "Login successful"}
+    )
     def post(self,request):
         email= request.data.get('email')
         if not  email:
@@ -54,6 +68,19 @@ class Signup(APIView):
 #! Login view
 
 class Login(APIView):
+    
+    @swagger_auto_schema(
+        operation_description="User login using email and password",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='User Email'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User Password'),
+            },
+            required=['email', 'password']
+        ),
+        responses={200: "Login successful"}
+    )
     def  post(self,request):
         email= request.data.get('email')
         password= request.data.get('password')
@@ -63,8 +90,7 @@ class Login(APIView):
             },status=status.HTTP_400_BAD_REQUEST)
             
         user= authenticate(email=email,password=password)
-        user.last_login= datetime.now()
-        user.save()
+      
         if not user:
             return Response({
                 "error":"Invalid email or password"

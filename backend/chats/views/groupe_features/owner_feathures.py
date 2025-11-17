@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +8,7 @@ from chats.Models import GroupeChatModel
 from rest_framework.views import APIView
 from chats.serializers.groupeser import groupeserializer
 from service.custom_permissions import  Isowner
-
+from  rest_framework.parsers import MultiPartParser, FormParser
 
 #! remove  users in  groupe  by only  owner  
 @api_view(['PATCH'])
@@ -70,12 +70,15 @@ def remove_member(request,g_id):
 
 @api_view(['PATCH'])
 @permission_classes([Isowner])
+@parser_classes([MultiPartParser, FormParser])
 
 def update_name_profile(request,g_id):
     if not request.data.get("groupe_name"):
+        
          return Response({
              "error":"groupe name is required"
          })
+    image= request.FILES.get('profile_image')
     
     
     try:
