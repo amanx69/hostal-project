@@ -4,7 +4,8 @@ from .views.groupe_features import owner_feathures, member_features, Groupe_feat
 
 urlpatterns = [
     path('create_chat/', chatviews.chatview.as_view(), name='create_chat'),
-    path("<int:room_id>/send-message/", chatviews.Sendmessage.as_view(), name='send_message'),
+    # path("<int:room_id>/send-message/", chatviews.Sendmessage.as_view(), name='send_message'),
+    path("roomlist/",chatviews.Chatroomlist.as_view(),name='roomlist'),
 
 
     

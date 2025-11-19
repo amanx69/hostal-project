@@ -7,7 +7,7 @@ from  django.shortcuts import  get_object_or_404
 from rest_framework.permissions import  IsAuthenticated
 from  chats.serializers import roomserializer
 from  chats.serializers import  msgserializer
-
+from  chats.serializers import roomserializer
 
 
     #! create  a  chatroom  between  two users
@@ -35,50 +35,37 @@ class chatview(APIView):
             "chatroom_id": create.id,
             "userdata":ser.data,
         }, status=status.HTTP_201_CREATED
-        )
+        ) 
         
         
             
 
             
                 
-#! send  massage  in chatroom
+#! fatch  all  list of  login user  chatmodel
 
 
-class Sendmessage(APIView):
-     permission_classes= [IsAuthenticated]
-     
-     def post(self,request,room_id):
-         sender=  request.user
-         message= request.data.get("msg")
-         
-         room= ChatModel.ChatRoom.objects.filter(id= room_id).first()
-         if room is  None:
-                return  Response({
-                    "error":"Chatroom  does  not  exist",
-                }, status=status.HTTP_404_NOT_FOUND
-                )
-         
-         
-         if room.user1 != sender and room.user2 != sender:
-                return  Response({
-                    "error":"You  are  not  a  member  of  this  chatroom",
-                }, status=status.HTTP_403_FORBIDDEN
-                )
-         
-         if message is  None:
-                return  Response({
-                    "error":"Message  text  is  required",
-                }, status=status.HTTP_400_BAD_REQUEST
-                )
-                
-         msg= ChatModel.Message.objects.create(ChatRoom=room,sender= sender,text=message)
-         
-         ser= msgserializer.msgserializer(msg)
-         return  Response({
-            "message":"Message  sent  successfully",
-            "msgdata": ser.data,
-          
-         }, status=status.HTTP_201_CREATED
-         )
+
+class Chatroomlist(APIView):
+    permission_classes= [IsAuthenticated]
+    
+    def get(self, request):
+        
+        list= ChatModel.ChatRoom.objects.filter(user1=request.user)
+        ser= roomserializer.RoomSerializer(list,many= True,context= {"request":request})
+        if ser.is_valid():
+            
+            return Response(
+                {
+                    "username":ser.data
+                }
+            )
+            
+        else:
+            return Response(ser.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+        
+
+
+
      

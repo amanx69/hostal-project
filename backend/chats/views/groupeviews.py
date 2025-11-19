@@ -24,6 +24,8 @@ def create_groupe(request):
             "error":"Groupe name cannot be empty."
         },status=status.HTTP_400_BAD_REQUEST)
         
+        #! if groupe name is exit
+        
     if GroupeChatModel.GroupesChat.objects.filter(groupe_name=Groupe_name).exists():
         return Response({
             "error":"Groupe name already exists."
@@ -72,10 +74,6 @@ def add_memeber(request,groupe_id):
         
     #! if  user in groupe  than add  memebr  in groupe
     if request.user == groupe.owner or request.user in groupe.members.all():
-        
-        
-        
-        
         
         if len(users)==1:
             

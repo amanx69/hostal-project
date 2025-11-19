@@ -58,7 +58,9 @@ INSTALLED_APPS = [
     'chats',
     'Home',
     'complains',
-]
+    "Notifictions",
+    
+    ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

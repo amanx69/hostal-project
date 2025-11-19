@@ -28,18 +28,7 @@ def get_token(user):
 
 class Signup(APIView):
     
-    @swagger_auto_schema(
-        operation_description="User login using email and password",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='User Email'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User Password'),
-            },
-            required=['email', 'password']
-        ),
-        responses={200: "Login successful"}
-    )
+ 
     def post(self,request):
         email= request.data.get('email')
         if not  email:

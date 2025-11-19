@@ -58,6 +58,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
        
         await save_message(sender_id,room_id,msg)
         
+        
         await self.channel_layer.group_send(
             self.groupe_name,
             {

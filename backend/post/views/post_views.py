@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from post.serializers import post_Serializer
 from  post.models import post_model
-
-
+from service import FirebaseNotifictions
+from Notifictions.models import Notification
 
 
 
@@ -14,12 +14,18 @@ from  post.models import post_model
 
 class CreatePost(APIView):
     def post(self,request):
+        token= request.data.get("token")
         try:
             ser= post_Serializer.PostSerializer(data=request.data, context={'request': request})
             if ser.is_valid():
                 post= ser.save()
                 #TODO in future  send notification to  followers
-                
+                #! for testing
+
+                FirebaseNotifictions.send_notification(token= token,title=f"new post{request.user.username}",body= post.title)
+                #! create  a notifiction
+                notif=  Notification.objects.create(user= request.user,title=f"new post{request.user.username}",body= post.title)
+                notif.save()
                 return Response({
                     "message":"post created successfully",
                     "data":ser.data
