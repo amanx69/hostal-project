@@ -39,7 +39,7 @@ class _LoginScreenState extends State<Singupscreen> {
 
               // Title
               Text(
-                "Welcome ",
+                "Welcome to my app ",
                 style: GoogleFonts.poppins(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.bold,
