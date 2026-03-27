@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import  os
 from datetime import timedelta
+from  decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-y@1dk%n0lg289r7o9!6d0#%@b7@onc2u!)(9sk16u*6th0eme"
+SECRET_KEY = config('Sc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -77,7 +79,7 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -102,16 +104,10 @@ CHANNEL_LAYERS = {
     },
 }
 
-
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hostal',        # your database name
-        'USER': 'postgres',          # your postgres username
-        'PASSWORD': 'aman', # your postgres password
-        'HOST': 'localhost',         # or IP address / domain
-        'PORT': '5432',              # default PostgreSQL port
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -199,12 +195,12 @@ CHANNEL_LAYERS = {
 
 #! for email sen
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = config('email_b')
+EMAIL_HOST = config('email_h')
 EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'anujaman56@gmail.com'
-EMAIL_HOST_PASSWORD = 'oonp crms fhgv sfsn'
+EMAIL_PORT = config('email_port')
+EMAIL_HOST_USER = config('email_host')
+EMAIL_HOST_PASSWORD = config('email_pass')
 
 
 
@@ -218,3 +214,9 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+
+#! for  celery
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'

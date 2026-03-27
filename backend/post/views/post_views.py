@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from post.serializers import post_Serializer
 from  post.models import post_model
-from service import FirebaseNotifictions
+
 from Notifictions.models import Notification
 
 
@@ -22,7 +22,7 @@ class CreatePost(APIView):
                 #TODO in future  send notification to  followers
                 #! for testing
 
-                FirebaseNotifictions.send_notification(token= token,title=f"new post{request.user.username}",body= post.title)
+             
                 #! create  a notifiction
                 notif=  Notification.objects.create(user= request.user,title=f"new post{request.user.username}",body= post.title)
                 notif.save()
