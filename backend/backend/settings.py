@@ -95,14 +95,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 ASGI_APPLICATION = "backend.asgi.application"
 
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        }
-    },
-}
+
 
 DATABASES = {
     "default": {
@@ -148,6 +141,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -171,6 +165,11 @@ REST_FRAMEWORK = {
     'rest_framework.authentication.TokenAuthentication',
         
     ),
+     'DEFAULT_THROTTLE_RATES': {
+        'login': config('login'),  #! for  login throtling
+        'signup': config('signup'),  #! for  signup throtling
+        
+    }
 }
 #! for jwt  refreh tocken  and logout  
 SIMPLE_JWT = {
@@ -220,3 +219,14 @@ CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+# for  catching  
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

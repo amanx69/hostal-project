@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import User
 import re
-
+from rest_framework.exceptions import ValidationError
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -41,3 +41,26 @@ class UserSerializer(serializers.ModelSerializer):
         if not value or value.strip() == "":
             raise serializers.ValidationError("Email cannot be empty.")
         return value
+
+
+#! Serializer for login view
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    
+    
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or email.strip() == "":
+            raise serializers.ValidationError({"email": "Email is required"})
+        if not password or password.strip() == "":
+            raise serializers.ValidationError({"password": "Password is required"})
+
+        return data
+    
+    
+    
+    
+    

@@ -17,6 +17,9 @@ from service.gernateToken import  generate_verification_token
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
+from .Serializer import LoginSerializer
+from .service import gernate_username
+
 
 
 User= get_user_model()
@@ -35,79 +38,76 @@ def get_token(user):
 
 
 class Signup(APIView):
+    throttle_scope = 'signup'  #! for  signup throtling
     
-    
- 
     def post(self,request)->Response:
-        email= request.data.get('email')
-      
-        ser= UserSerializer(data=request.data)
-        if ser.is_valid(raise_exception=True):
         
-            user=  ser.save()
-            email= user.email
-            SendWelcomeEmail.delay(email)#! send the  email 
-            uid, token = generate_verification_token(user) #! gernate token 
-            print(uid, token)
-            send_verification_email.delay(email,uid,token)#! send the  email
-          
-            token= get_token(user)
+        email= request.data.get('email')
+        try:
+            ser= UserSerializer(data=request.data)
+            if ser.is_valid(raise_exception=True):
+            
+                user=  ser.save()
+                email= user.email
+                SendWelcomeEmail.delay(email)#! send the  email 
+                uid, token = generate_verification_token(user) #! gernate token 
+                print(uid, token)
+                send_verification_email.delay(email,uid,token)#! send the  email
+            
+                token= get_token(user)
+                return Response({
+                    "message":"user created successfully",
+                    "email":user.email,
+                    "id":user.id,
+                    "access": token['access'],
+                    "refresh": token['refresh'],
+         
+                })
+            else:
+                return Response({
+                    "error":"somthing went wrong",
+                },status=status.HTTP_400_BAD_REQUEST)
+       
+            
+        except Exception as e:
             return Response({
-                "message":"user created successfully",
-                "data":ser.data,
-                "access": token['access'],
-                "refresh": token['refresh'],
-              
-			
-    
-                
-            })
-        return Response(ser.errors,status=status.HTTP_400_BAD_REQUEST)
-
+                "error":"SOMTHING WENT WRONG",
+            },status=status.HTTP_400_BAD_REQUEST)
+      
+     
 #! Login view
 #TODO  in future  add  verification check  for login  if user is not verified then  return  error message to verify email first
 class Login(APIView):
+    throttle_scope = 'login'  #! for  login throtling
     
-    @swagger_auto_schema(
-        operation_description="User login using email and password",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='User Email'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='User Password'),
-            },
-            required=['email', 'password']
-        ),
-        responses={200: "Login successful"}
-    )
     def  post(self,request):
-        email= request.data.get('email')
-        password= request.data.get('password')
-        if not email or not password:
-            return Response({
-                "error":"Email and password are required"
-            },status=status.HTTP_400_BAD_REQUEST)
-            
-        user= authenticate(email=email,password=password)
-      
-        if not user:
-            return Response({
-                "error":"Invalid email or password"
-            },status=status.HTTP_401_UNAUTHORIZED)
-            
-        token= get_token(user)
+        serializer= LoginSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            email= serializer.validated_data['email']
+            password= serializer.validated_data['password']
+            user= authenticate(email=email,password=password)
         
-        return Response({
-            "message":"Login successful",
-            "access": token['access'],
-            "refresh": token['refresh'],
-            "user": UserSerializer(user).data
+            if not user:
+                return Response({
+                    "error":"Invalid email or password"
+                },status=status.HTTP_401_UNAUTHORIZED)
+                
+            else:
+                token= get_token(user)
             
+                return Response({
+                    "message":"Login successful",
+                    "access": token['access'],
+                    "refresh": token['refresh'],
+                    "user": UserSerializer(user).data
+                    
+                    
+                })
+        
             
-        })
+       
         
-        
-        
+
         
 
 #! verify email view
@@ -120,6 +120,8 @@ class VerifyEmail(APIView):
 
             if default_token_generator.check_token(user, token):
                 user.is_verified = True
+                usename=gernate_username()
+                user.username= usename #! set  random username for user 
                 user.save()
                 return Response({"message": "Email verified"})
             else:

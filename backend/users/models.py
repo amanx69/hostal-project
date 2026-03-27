@@ -28,7 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=100,blank= True,)
     phone = models.CharField(max_length=15, blank=True, null=True)
     bio=models.TextField(blank=True,max_length=50)
-    profile_pic = models.ImageField(upload_to="profile_images/", null=True, blank=True)
+    profile_pic = models.ImageField(upload_to="profile_images/", null=True, 
+                blank=True,default="default/profile-pic.webp")
     created_at = models.DateTimeField(auto_now_add=True)
     dateofbirth = models.DateField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)
@@ -47,3 +48,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    
+    
