@@ -43,19 +43,19 @@ class Signup(APIView):
     def post(self,request)->Response:
         
         email= request.data.get('email')
-        try:
-            ser= UserSerializer(data=request.data)
-            if ser.is_valid(raise_exception=True):
+        
+        ser= UserSerializer(data=request.data)
+        if ser.is_valid(raise_exception=True):
             
-                user=  ser.save()
-                email= user.email
-                SendWelcomeEmail.delay(email)#! send the  email 
-                uid, token = generate_verification_token(user) #! gernate token 
-                print(uid, token)
-                send_verification_email.delay(email,uid,token)#! send the  email
+            user=  ser.save()
+            email= user.email
+            SendWelcomeEmail.delay(email)#! send the  email 
+            uid, token = generate_verification_token(user) #! gernate token 
+            print(uid, token)
+            send_verification_email.delay(email,uid,token)#! send the  email
             
-                token= get_token(user)
-                return Response({
+            token= get_token(user)
+            return Response({
                     "message":"user created successfully",
                     "email":user.email,
                     "id":user.id,
@@ -63,17 +63,12 @@ class Signup(APIView):
                     "refresh": token['refresh'],
          
                 })
-            else:
+        else:
                 return Response({
                     "error":"somthing went wrong",
                 },status=status.HTTP_400_BAD_REQUEST)
        
-            
-        except Exception as e:
-            return Response({
-                "error":"SOMTHING WENT WRONG",
-            },status=status.HTTP_400_BAD_REQUEST)
-      
+        
      
 #! Login view
 #TODO  in future  add  verification check  for login  if user is not verified then  return  error message to verify email first
@@ -120,8 +115,6 @@ class VerifyEmail(APIView):
 
             if default_token_generator.check_token(user, token):
                 user.is_verified = True
-                usename=gernate_username()
-                user.username= usename #! set  random username for user 
                 user.save()
                 return Response({"message": "Email verified"})
             else:

@@ -1,9 +1,9 @@
 from  django.urls import path
 from  post.views import post_views,comment_views,like_views,following_Views
+from rest_framework.routers import DefaultRouter
 
-urlpatterns= [
-    #! post  related  url
-     path("uploadpost/",post_views.CreatePost.as_view(),name="uploadpost"),
-     #!  following  system  related  url
+router= DefaultRouter()
+router.register('posts', post_views.PostViewSet, basename='post-viewset')
+urlpatterns= router.urls
+
    
-]

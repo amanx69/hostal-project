@@ -10,6 +10,7 @@ class Post(models.Model):
     media= models.FileField(upload_to='post_media/',null= True,blank= True)
     
     
+    
     def __str__(self):
         return f"Post by {self.user.email} - {self.title}"
     class Mata:

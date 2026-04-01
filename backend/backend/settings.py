@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
     #! fro  testing
     'drf_yasg',
     #! third  party
@@ -52,7 +51,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
-    'Profile',
     'users',
     'channels',
     'post',
@@ -60,7 +58,8 @@ INSTALLED_APPS = [
     'chats',
     'Home',
     'complains',
-    "Notifictions",
+    #! signals
+    "Profile.apps.ProfileConfig",
     
     ]
 

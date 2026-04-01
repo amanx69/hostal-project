@@ -25,17 +25,9 @@ class UserManager(BaseUserManager):
  ##!Custom User Model
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True,blank=False)   # used for login
-    username = models.CharField(max_length=100,blank= True,)
-    phone = models.CharField(max_length=15, blank=True, null=True)
-    bio=models.TextField(blank=True,max_length=50)
-    profile_pic = models.ImageField(upload_to="profile_images/", null=True, 
-                blank=True,default="default/profile-pic.webp")
     created_at = models.DateTimeField(auto_now_add=True)
-    dateofbirth = models.DateField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)
    
-    
-
     # Required fields
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -43,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = "email"   # login field
-    REQUIRED_FIELDS = ["username"]   # when creating superuser
+    REQUIRED_FIELDS = [""]   # when creating superuser
     read_only_fields = ["id", "username", "email","created_at"]
 
     def __str__(self):
