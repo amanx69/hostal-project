@@ -8,19 +8,25 @@ from rest_framework.permissions import IsAuthenticated
 
 
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
 
 class PostViewSet(ModelViewSet):
-    queryset = post_model.Post.objects.all().select_related("user").order_by("-created_at")
+    queryset = (
+        post_model.Post.objects.all()
+        .select_related("user", "user__user_profile")
+        .prefetch_related("comments", "likes")
+        .order_by("-created_at")
+    )
     serializer_class = post_Serializer.PostSerializer
     parser_classes = [MultiPartParser, FormParser]
+    filterset_fields = ["user"]
 
     #  Permissions
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [AllowAny()]
+            return [IsAuthenticated()]
         return [IsAuthenticatedOrReadOnly()]
 
     def perform_create(self, serializer):

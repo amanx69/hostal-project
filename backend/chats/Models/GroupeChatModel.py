@@ -38,4 +38,4 @@ class Groupemembers(models.Model):
     leave_at= models.DateTimeField(null=True,blank=True)
     
     def __str__(self):
-        return self.member.username
+        return self.member.email

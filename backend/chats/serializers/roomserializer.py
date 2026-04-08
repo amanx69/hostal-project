@@ -21,10 +21,10 @@ class  RoomSerializer(serializers.ModelSerializer):
     def  get_secound_user(self,obj):
         if  obj.user1.id== self.context['request'].user.id:
             return {
-                "username":obj.user2.username,
+                "email": obj.user2.email,
               
               
                 
             }
         else:
-            return obj.user1.username
+            return {"email": obj.user1.email}

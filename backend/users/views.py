@@ -108,17 +108,27 @@ class Login(APIView):
 #! verify email view
 
 class VerifyEmail(APIView):
-       def get(self, request, uid, token):
+    def get(self, request, uid, token):
         try:
-            user_id = urlsafe_base64_decode(uid).decode()
-            user = User.objects.get(pk=user_id)
+            # Decode the user ID
+            try:
+                user_id = urlsafe_base64_decode(uid).decode()
+            except Exception:
+                return Response({"error": "Invalid UID"}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Fetch the user
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return Response({"error": "User matching query does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Verify the token
             if default_token_generator.check_token(user, token):
                 user.is_verified = True
                 user.save()
                 return Response({"message": "Email verified"})
             else:
-                return Response({"error": "Invalid token"})
+                return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

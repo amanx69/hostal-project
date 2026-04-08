@@ -68,8 +68,7 @@ class  groupeConsumer(AsyncWebsocketConsumer):
             'message': event['message'],
             'sender_id': event['sender_id'],
             "name": self.groupe_name,
-            "username": self.scope['user'].username,
-            "profile_pic": self.scope['user'].profile_pic.url if self.scope['user'].profile_pic else None
+            "sender_email": self.scope['user'].email,
         }))
         
         

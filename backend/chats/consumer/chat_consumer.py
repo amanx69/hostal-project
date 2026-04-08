@@ -56,7 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         #! save massage in  db  
        
-        await save_message(sender_id,room_id,msg)
+        await save_message(room_id, sender_id, msg)
         
         
         await self.channel_layer.group_send(
@@ -75,8 +75,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': event['msg'],
             'sender_id': event['sender_id'],
             "room_id":event['room_id'],
-            "username": self.user.username,
-            "profile_pic": self.user.profile_pic.url if self.user.profile_pic else None
+            "sender_email": self.user.email,
         }))
 
 

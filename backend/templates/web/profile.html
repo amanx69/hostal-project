@@ -1,0 +1,381 @@
+{% extends "web/base.html" %}
+{% block title %}Profile • Hostal{% endblock %}
+
+{% block content %}
+  <div class="grid">
+    <div class="card" style="min-height: 340px">
+      <h2 style="margin-bottom: 6px" id="usernameBox">Profile</h2>
+      <p class="muted" id="emailBox" style="margin-top: 0px"></p>
+
+      <div style="display:flex; gap:14px; align-items:center; margin-top: 12px">
+        <img
+          id="profilePic"
+          src=""
+          alt="profile"
+          style="width: 74px; height: 74px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.12); object-fit: cover"
+        />
+        <div>
+          <div style="display:flex; gap: 14px; flex-wrap: wrap">
+            <span class="muted" id="followersCount"></span>
+            <span class="muted" id="followingCount"></span>
+          </div>
+          <div style="margin-top: 10px">
+            <p style="margin:0" class="muted" id="bioBox"></p>
+          </div>
+
+          <div style="margin-top: 12px">
+            <div class="muted" style="font-size: 13px">Following</div>
+            <div id="followingUsers" class="muted" style="font-size: 13px; margin-top: 6px"></div>
+          </div>
+
+          <div style="margin-top: 10px">
+            <div class="muted" style="font-size: 13px">Followers</div>
+            <div id="followersUsers" class="muted" style="font-size: 13px; margin-top: 6px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; display:flex; gap: 10px; align-items:center">
+        <button class="btn btn-primary" id="followBtn" type="button" style="display:none">Follow</button>
+        <button class="btn" id="unfollowBtn" type="button" style="display:none">Unfollow</button>
+        <a class="btn" href="/" id="backBtn">Back to Feed</a>
+      </div>
+
+      <div class="error" id="errorBox" style="display:none; margin-top: 12px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Posts</h2>
+      <p class="muted" id="postsStatus" style="margin-top:-4px">Loading...</p>
+      <div id="postsContainer"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    const userId = {{ user_id }};
+
+    const postsContainer = document.getElementById("postsContainer");
+    const postsStatus = document.getElementById("postsStatus");
+    const errorBox = document.getElementById("errorBox");
+
+    const usernameBox = document.getElementById("usernameBox");
+    const emailBox = document.getElementById("emailBox");
+    const profilePic = document.getElementById("profilePic");
+    const followersCount = document.getElementById("followersCount");
+    const followingCount = document.getElementById("followingCount");
+    const bioBox = document.getElementById("bioBox");
+    const followingUsersBox = document.getElementById("followingUsers");
+    const followersUsersBox = document.getElementById("followersUsers");
+
+    const followBtn = document.getElementById("followBtn");
+    const unfollowBtn = document.getElementById("unfollowBtn");
+
+    const backBtn = document.getElementById("backBtn");
+
+    function getAccessToken() {
+      try {
+        return localStorage.getItem("access_token");
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+    }
+
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
+
+    let myUserId = null;
+
+    async function fetchMyProfile() {
+      const token = getAccessToken();
+      if (!token) return null;
+
+      const res = await fetch("/pro/profile/", {
+        headers: { "Authorization": "Bearer " + token },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      myUserId = data?.profile?.user_id ?? null;
+      return myUserId;
+    }
+
+    function postMediaHtml(mediaUrl) {
+      if (!mediaUrl) return "";
+      const lower = mediaUrl.toLowerCase();
+      if (lower.endsWith(".pdf")) {
+        return `<a class="btn" href="${mediaUrl}" target="_blank" rel="noreferrer" style="display:inline-flex; margin-top:8px">Open PDF</a>`;
+      }
+      if (lower.endsWith(".mp4") || lower.endsWith(".webm")) {
+        return `<video class="media" controls src="${mediaUrl}" />`;
+      }
+      return `<img class="media" src="${mediaUrl}" alt="media" />`;
+    }
+
+    async function refreshProfileAndPosts() {
+      clearError();
+      postsStatus.textContent = "Loading...";
+
+      try {
+        await fetchMyProfile();
+
+        const token = getAccessToken();
+        const headers = token ? { "Authorization": "Bearer " + token } : {};
+
+        let data;
+        if (userId === -1) {
+          const meRes = await fetch("/pro/profile/", { headers });
+          data = await meRes.json();
+        } else {
+          const res = await fetch(`/pro/profile/${userId}/`, { headers });
+          data = await res.json();
+        }
+
+        const profile = data.profile;
+        usernameBox.textContent = profile?.username ?? "User";
+        emailBox.textContent = profile?.email ?? "";
+        followersCount.textContent = `Followers: ${data?.stats?.followers_count ?? 0}`;
+        followingCount.textContent = `Following: ${data?.stats?.following_count ?? 0}`;
+        bioBox.textContent = profile?.bio ? `Bio: ${profile.bio}` : "No bio";
+
+        profilePic.src = profile?.profile_picture ?? "";
+
+        // Follow buttons (hide if it's me)
+        const isFollowing = data?.is_following === true;
+        const effectiveUserId = data?.profile?.user_id ?? userId;
+        if (myUserId && myUserId === effectiveUserId) {
+          followBtn.style.display = "none";
+          unfollowBtn.style.display = "none";
+        } else {
+          if (!token) {
+            followBtn.style.display = "none";
+            unfollowBtn.style.display = "none";
+          } else {
+            followBtn.style.display = isFollowing ? "none" : "inline-flex";
+            unfollowBtn.style.display = isFollowing ? "inline-flex" : "none";
+          }
+        }
+
+        const posts = data?.posts ?? [];
+        if (!posts.length) {
+          postsStatus.textContent = "No posts yet.";
+          postsContainer.innerHTML = "";
+          return;
+        }
+
+        postsStatus.textContent = `Showing ${posts.length} posts`;
+        postsContainer.innerHTML = posts.map((p) => renderPostCard(p)).join("");
+
+        // Following/followers lists (only available to authenticated users)
+        if (getAccessToken()) {
+          try {
+            const listRes1 = await fetch(`/posts/following/${profile.user_id}/`, {
+              headers: { "Authorization": "Bearer " + token },
+            });
+            const listRes2 = await fetch(`/posts/followers/${profile.user_id}/`, {
+              headers: { "Authorization": "Bearer " + token },
+            });
+            const followingData = await listRes1.json().catch(() => ({}));
+            const followersData = await listRes2.json().catch(() => ({}));
+
+            followingUsersBox.textContent = (followingData?.users ?? [])
+              .map((u) => u.email)
+              .join(", ");
+            followersUsersBox.textContent = (followersData?.users ?? [])
+              .map((u) => u.email)
+              .join(", ");
+          } catch (_) {
+            followingUsersBox.textContent = "Could not load lists.";
+            followersUsersBox.textContent = "Could not load lists.";
+          }
+        } else {
+          followingUsersBox.textContent = "Login required.";
+          followersUsersBox.textContent = "Login required.";
+        }
+      } catch (e) {
+        postsStatus.textContent = "Failed to load profile.";
+        showError(String(e));
+      }
+    }
+
+    function renderPostCard(p) {
+      const postId = p.id;
+      const title = p.title ? p.title : "Untitled";
+      const dec = p.dec ? p.dec : "";
+      const createdAt = p.created_at ? p.created_at : "";
+
+      const mediaHtml = postMediaHtml(p.media);
+
+      const authorId = p.author_user_id;
+      const authorName = p.post_user?.username ?? "User";
+      const liked = p.liked_by_me === true;
+      const likeCount = p.likes_count ?? 0;
+      const commentsCount = p.comments_count ?? 0;
+
+      // Comments UI is minimal: collapse by default, load from serializer already includes comments array.
+      const comments = Array.isArray(p.comments) ? p.comments : [];
+      const commentsHtml = comments.length
+        ? `<div style="margin-top:10px">
+            <div class="post-meta" style="margin-bottom:6px">${comments.length} comments</div>
+            ${comments
+              .slice(0, 4)
+              .map((c) => `<div class="muted" style="margin: 6px 0 0; font-size: 13px"><b>${c.user_email ?? "user"}:</b> ${c.text ?? ""}</div>`)
+              .join("")}
+          </div>`
+        : "";
+
+      return `
+        <div class="post">
+          <div style="display:flex; justify-content: space-between; gap: 12px; align-items: flex-start">
+            <a class="post-meta" href="/profile/${authorId}/" style="display:inline-block; cursor:pointer; color: rgba(255,255,255,0.8)">
+              ${authorName}
+            </a>
+            <div class="post-meta">${createdAt}</div>
+          </div>
+
+          <h3 class="post-title" style="margin-top: 6px">${title}</h3>
+          <div class="post-meta">❤ ${likeCount} • 💬 ${commentsCount}</div>
+          ${dec ? `<div style="color:rgba(255,255,255,0.78);margin-bottom:10px;white-space:pre-wrap;">${dec}</div>` : ""}
+          ${mediaHtml}
+
+          <div style="display:flex; gap: 10px; flex-wrap: wrap; margin-top: 10px">
+            <button class="btn" type="button" data-like="${postId}">
+              ${liked ? "Liked" : "Like"}
+            </button>
+            <button class="btn" type="button" data-focus-comments="${postId}">
+              Comment
+            </button>
+          </div>
+
+          ${commentsHtml}
+
+          <div id="commentBox-${postId}" style="display:none; margin-top: 12px">
+            <div class="muted" style="font-size: 13px; margin-bottom: 6px">Add comment</div>
+            <input id="commentInput-${postId}" placeholder="Write something..." style="margin-bottom: 8px" />
+            <div style="display:flex; gap: 10px">
+              <button class="btn btn-primary" type="button" data-send-comment="${postId}">Send</button>
+              <button class="btn" type="button" data-cancel-comment="${postId}">Cancel</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function toggleLike(postId) {
+      const token = getAccessToken();
+      if (!token) return showError("Login required to like posts.");
+
+      const res = await fetch(`/posts/like/${postId}/`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || data.detail || "Like failed");
+      }
+    }
+
+    async function sendComment(postId, text) {
+      const token = getAccessToken();
+      if (!token) return showError("Login required to comment.");
+
+      const res = await fetch(`/posts/comments/${postId}/`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || data.detail || "Comment failed");
+      }
+    }
+
+    document.addEventListener("click", async (e) => {
+      const likeBtn = e.target?.closest?.("[data-like]");
+      if (likeBtn) {
+        const postId = likeBtn.getAttribute("data-like");
+        try {
+          await toggleLike(postId);
+          await refreshProfileAndPosts();
+        } catch (err) {
+          showError(String(err));
+        }
+        return;
+      }
+
+      const focusBtn = e.target?.closest?.("[data-focus-comments]");
+      if (focusBtn) {
+        const postId = focusBtn.getAttribute("data-focus-comments");
+        document.getElementById(`commentBox-${postId}`).style.display = "block";
+        document.getElementById(`commentInput-${postId}`).focus();
+        return;
+      }
+
+      const cancelBtn = e.target?.closest?.("[data-cancel-comment]");
+      if (cancelBtn) {
+        const postId = cancelBtn.getAttribute("data-cancel-comment");
+        document.getElementById(`commentBox-${postId}`).style.display = "none";
+        return;
+      }
+
+      const sendBtn = e.target?.closest?.("[data-send-comment]");
+      if (sendBtn) {
+        const postId = sendBtn.getAttribute("data-send-comment");
+        const input = document.getElementById(`commentInput-${postId}`);
+        const text = (input.value || "").trim();
+        if (!text) return showError("Please write a comment.");
+        try {
+          await sendComment(postId, text);
+          await refreshProfileAndPosts();
+        } catch (err) {
+          showError(String(err));
+        }
+      }
+    });
+
+    followBtn?.addEventListener("click", async () => {
+      clearError();
+      const token = getAccessToken();
+      if (!token) return showError("Login required.");
+      const res = await fetch(`/posts/follow/${userId}/`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showError(data.error || data.detail || "Follow failed");
+        return;
+      }
+      refreshProfileAndPosts();
+    });
+
+    unfollowBtn?.addEventListener("click", async () => {
+      clearError();
+      const token = getAccessToken();
+      if (!token) return showError("Login required.");
+      const res = await fetch(`/posts/follow/${userId}/unfollow/`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showError(data.error || data.detail || "Unfollow failed");
+        return;
+      }
+      refreshProfileAndPosts();
+    });
+
+    refreshProfileAndPosts();
+  </script>
+{% endblock %}
+

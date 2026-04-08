@@ -43,20 +43,20 @@ def remove_member(request,g_id):
                 continue
             
             if remove_user not in groupe.members.all():
-                not_in_group.append(remove_user.username)
+                not_in_group.append(remove_user.email)
                 continue
             
             groupe.members.remove(remove_user)
-            removed_users.append(remove_user.username)
+            removed_users.append(remove_user.email)
 
         groupe.save()
 
         return Response({
-            "message": f"Action by {request.user.username} on group {groupe.groupe_name}",
+            "message": f"Action by {request.user.email} on group {groupe.groupe_name}",
             "removed_users": removed_users,
             "not_found_users": not_found_users,
             "not_in_group": not_in_group,
-            "remaining_members": [user.username for user in groupe.members.all()]
+            "remaining_members": [user.email for user in groupe.members.all()]
         }, status=status.HTTP_200_OK)
     else:
         return Response({

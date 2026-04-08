@@ -41,7 +41,7 @@ def create_groupe(request):
         "message":"Groupe created successfully",
         "groupe_id": groupe.id,
         "groupe_name": groupe.groupe_name,
-        "ownner": groupe.owner.username
+        "ownner": groupe.owner.email
     })
     
     
@@ -100,7 +100,7 @@ def add_memeber(request,groupe_id):
             groupe.save()
             
             return Response({
-                "message": f"user{request.user.username} add in {adduser.username} in {groupe.groupe_name}" })
+                "message": f"user{request.user.email} add in {adduser.email} in {groupe.groupe_name}" })
             
         else:
             
@@ -116,7 +116,7 @@ def add_memeber(request,groupe_id):
                         
                         #! if user already  in groupe
                     if adduser in groupe.members.all():
-                        already_in_groupe.append(adduser.username)
+                        already_in_groupe.append(adduser.email)
                         continue
                     
                 
@@ -126,11 +126,11 @@ def add_memeber(request,groupe_id):
                 
             
             groupe.save()
-            added_users = [user.username for user in groupe.members.all()]
+            added_users = [user.email for user in groupe.members.all()]
             return Response({
                 "not_found_user":not_found_user,
                 "already in groupe":already_in_groupe,
-                "message": f"user{request.user.username} add in {added_users} in {groupe.groupe_name}"
+                "message": f"user{request.user.email} add in {added_users} in {groupe.groupe_name}"
             })     
 
 

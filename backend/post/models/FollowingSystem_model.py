@@ -13,4 +13,4 @@ class FollowingSystem(models.Model):
         unique_together = ('follower', 'following')
         
     def __str__(self):
-        return f"{self.follower.username} follows {self.following.username}"
+        return f"{self.follower.email} follows {self.following.email}"

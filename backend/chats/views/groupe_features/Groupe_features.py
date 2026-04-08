@@ -24,7 +24,7 @@ def  qr_code(request, g_id:int):
         "groupe_id":groupe.id,
         "groupe_name":groupe.groupe_name,
         "profile":groupe.groupe_profile_image.url if groupe.groupe_profile_image else None,
-        "groupe_owner":groupe.owner.username,
+        "groupe_owner":groupe.owner.email,
         "memeber":groupe.members.all().count(),
         
     }

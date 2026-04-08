@@ -50,19 +50,9 @@ class Chatroomlist(APIView):
     permission_classes= [IsAuthenticated]
     
     def get(self, request):
-        
-        list= ChatModel.ChatRoom.objects.filter(user1=request.user)
-        ser= roomserializer.RoomSerializer(list,many= True,context= {"request":request})
-        if ser.is_valid():
-            
-            return Response(
-                {
-                    "username":ser.data
-                }
-            )
-            
-        else:
-            return Response(ser.errors,status=status.HTTP_400_BAD_REQUEST)
+        rooms = ChatModel.ChatRoom.objects.filter(user1=request.user) | ChatModel.ChatRoom.objects.filter(user2=request.user)
+        ser = roomserializer.RoomSerializer(rooms, many=True, context={"request": request})
+        return Response({"rooms": ser.data}, status=status.HTTP_200_OK)
         
         
 

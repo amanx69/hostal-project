@@ -45,6 +45,8 @@ urlpatterns = [
     path("chats/",include("chats.urls")), 
     path("pro/",include("Profile.urls")),  
     path("comp/",include("complains.urls")),
+    # Django template web UI (login/signup/posts feed)
+    path("", include("Home.urls")),
     
     #! sawger ui
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',

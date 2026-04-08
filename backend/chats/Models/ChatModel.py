@@ -29,4 +29,4 @@ class Message(models.Model):
     
     
     def  __str__(self):
-        return  f"message from {self.sender.username} in  room  {self.text[:5]}"    
+        return  f"message from {self.sender.email} in room {self.text[:5]}"

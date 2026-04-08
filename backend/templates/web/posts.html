@@ -1,0 +1,390 @@
+{% extends "web/base.html" %}
+{% block title %}Posts • Hostal{% endblock %}
+
+{% block content %}
+  <div class="grid">
+    <div class="card">
+      <h2>Posts</h2>
+      <p class="muted" id="feedStatus" style="margin-top:-4px">Loading...</p>
+      <div id="postsContainer"></div>
+    </div>
+
+    <div class="card" id="createCard">
+      <h2>Create Post</h2>
+      <p class="muted" id="authHint" style="margin-top:-4px"></p>
+
+      <form id="createPostForm" enctype="multipart/form-data">
+        <div style="margin-top:10px">
+          <label class="muted">Title</label>
+          <input id="title" name="title" type="text" placeholder="Post title" />
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="muted">Description</label>
+          <textarea id="dec" name="dec" placeholder="Share something..." ></textarea>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="muted">Media (image/video/PDF)</label>
+          <input id="media" name="media" type="file" accept="image/*,video/*,application/pdf" />
+        </div>
+
+        <div style="margin-top:14px; display:flex; gap:10px; align-items:center">
+          <button class="btn btn-primary" id="createBtn" type="submit">Upload</button>
+          <button class="btn" id="clearBtn" type="button">Clear</button>
+        </div>
+
+        <div class="error" id="errorBox" style="display:none"></div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    const postsContainer = document.getElementById("postsContainer");
+    const feedStatus = document.getElementById("feedStatus");
+
+    const createCard = document.getElementById("createCard");
+    const authHint = document.getElementById("authHint");
+    const errorBox = document.getElementById("errorBox");
+    const createForm = document.getElementById("createPostForm");
+    const clearBtn = document.getElementById("clearBtn");
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+    }
+
+    function clearError() {
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
+
+    function getAccessToken() {
+      try {
+        return localStorage.getItem("access_token");
+      } catch (_) {
+        return null;
+      }
+    }
+
+    let myUserId = null;
+
+    async function fetchMyUserId() {
+      const token = getAccessToken();
+      if (!token) return null;
+      try {
+        const res = await fetch("/pro/profile/", {
+          headers: { "Authorization": "Bearer " + token },
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        myUserId = data?.profile?.user_id ?? null;
+        return myUserId;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function postMediaHtml(mediaUrl) {
+      if (!mediaUrl) return "";
+      const lower = String(mediaUrl).toLowerCase();
+      if (lower.endsWith(".pdf")) {
+        return `<a class="btn" href="${mediaUrl}" target="_blank" rel="noreferrer" style="display:inline-flex; margin-top:8px">Open PDF</a>`;
+      }
+      if (lower.endsWith(".mp4") || lower.endsWith(".webm")) {
+        return `<video class="media" controls src="${mediaUrl}"></video>`;
+      }
+      return `<img class="media" src="${mediaUrl}" alt="media" />`;
+    }
+
+    async function fetchPosts() {
+      postsContainer.innerHTML = "";
+      feedStatus.textContent = "Loading...";
+
+      try {
+        await fetchMyUserId();
+        const res = await fetch("/posts/posts/");
+        const data = await res.json();
+
+        // Depending on serializer/viewset defaults, list can be array or have `results`.
+        const list = Array.isArray(data) ? data : (data?.results || data?.posts || []);
+
+        if (!list.length) {
+          feedStatus.textContent = "No posts yet.";
+          return;
+        }
+
+        feedStatus.textContent = `Showing ${list.length} posts`;
+
+        postsContainer.innerHTML = list.map((p) => {
+          const postId = p.id;
+          const title = p.title ? p.title : "Untitled";
+          const dec = p.dec ? p.dec : "";
+          const createdAt = p.created_at ? p.created_at : "";
+
+          const mediaHtml = postMediaHtml(p.media);
+
+          const authorId = p.author_user_id;
+          const authorName = p.post_user?.username ?? "User";
+
+          const liked = p.liked_by_me === true;
+          const likeCount = p.likes_count ?? 0;
+          const commentsCount = p.comments_count ?? 0;
+
+          const isFollowing = p.is_following_author === true;
+          const showFollow = myUserId && myUserId !== authorId;
+
+          const followButtonHtml = showFollow
+            ? (isFollowing
+              ? `<button class="btn" type="button" data-unfollow="${authorId}">Unfollow</button>`
+              : `<button class="btn btn-primary" type="button" data-follow="${authorId}">Follow</button>`)
+            : "";
+
+          const comments = Array.isArray(p.comments) ? p.comments : [];
+          const commentsPreview = comments.length
+            ? `<div style="margin-top:10px">
+                <div class="post-meta" style="margin-bottom:6px">${comments.length} comments</div>
+                ${comments.slice(0, 3).map((c) => {
+                  const who = c.user_email ?? "user";
+                  const text = c.text ?? "";
+                  return `<div class="muted" style="font-size:13px; margin: 6px 0 0"><b>${who}:</b> ${text}</div>`;
+                }).join("")}
+              </div>`
+            : "";
+
+          return `
+            <div class="post">
+              <div style="display:flex; justify-content: space-between; gap: 12px; align-items:flex-start">
+                <a class="post-meta" href="/profile/${authorId}/" style="display:inline-block; cursor:pointer; color: rgba(255,255,255,0.8)">
+                  ${authorName}
+                </a>
+                <div class="post-meta">${createdAt}</div>
+              </div>
+
+              <h3 class="post-title" style="margin-top: 8px">${title}</h3>
+              <div class="post-meta">❤ ${likeCount} • 💬 ${commentsCount}</div>
+
+              ${dec ? `<div style="color:rgba(255,255,255,0.78);margin-bottom:10px;white-space:pre-wrap;">${dec}</div>` : ""}
+              ${mediaHtml}
+
+              <div style="display:flex; gap: 10px; flex-wrap: wrap; margin-top: 10px">
+                <button class="btn" type="button" data-like="${postId}">
+                  ${liked ? "Liked" : "Like"}
+                </button>
+
+                <button class="btn" type="button" data-focus-comments="${postId}">
+                  Comment
+                </button>
+
+                ${followButtonHtml}
+              </div>
+
+              ${commentsPreview}
+
+              <div id="commentBox-${postId}" style="display:none; margin-top: 12px">
+                <div class="muted" style="font-size: 13px; margin-bottom: 6px">Add comment</div>
+                <input id="commentInput-${postId}" placeholder="Write something..." style="margin-bottom: 8px" />
+                <div style="display:flex; gap: 10px">
+                  <button class="btn btn-primary" type="button" data-send-comment="${postId}">Send</button>
+                  <button class="btn" type="button" data-cancel-comment="${postId}">Cancel</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (e) {
+        feedStatus.textContent = "Failed to load posts.";
+        showError(String(e));
+      }
+    }
+
+    function syncAuthUI() {
+      const token = getAccessToken();
+      if (!token) {
+        authHint.textContent = "Login required to upload posts.";
+        createCard.querySelector("form").style.opacity = "0.6";
+        createCard.querySelector("form").style.pointerEvents = "none";
+      } else {
+        authHint.textContent = "You are logged in. Upload a post below.";
+        createCard.querySelector("form").style.opacity = "1";
+        createCard.querySelector("form").style.pointerEvents = "auto";
+      }
+    }
+
+    clearBtn?.addEventListener("click", () => {
+      document.getElementById("title").value = "";
+      document.getElementById("dec").value = "";
+      document.getElementById("media").value = "";
+      clearError();
+    });
+
+    createForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const token = getAccessToken();
+      if (!token) {
+        showError("Please login to upload a post.");
+        return;
+      }
+
+      const title = document.getElementById("title").value.trim();
+      const dec = document.getElementById("dec").value.trim();
+      const mediaInput = document.getElementById("media");
+
+      if (!title && !dec) {
+        showError("Please add a title or description.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("dec", dec);
+      if (mediaInput.files && mediaInput.files.length > 0) {
+        formData.append("media", mediaInput.files[0]);
+      }
+
+      const createBtn = document.getElementById("createBtn");
+      try {
+        createBtn.disabled = true;
+        createBtn.textContent = "Uploading...";
+
+        const res = await fetch("/posts/posts/", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + token,
+          },
+          body: formData,
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = data.error || data.detail || data.message || "Upload failed.";
+          showError(msg);
+          return;
+        }
+
+        // Reset + reload
+        createForm.reset();
+        await fetchPosts();
+      } catch (err) {
+        showError(String(err));
+      } finally {
+        createBtn.disabled = false;
+        createBtn.textContent = "Upload";
+      }
+    });
+
+    // If token exists, allow create button quick scroll.
+    document.getElementById("openCreatePostBtn")?.addEventListener("click", () => {
+      document.getElementById("createCard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.addEventListener("click", async (e) => {
+      const likeBtn = e.target?.closest?.("[data-like]");
+      if (likeBtn) {
+        const postId = likeBtn.getAttribute("data-like");
+        const token = getAccessToken();
+        if (!token) return showError("Login required to like posts.");
+        clearError();
+        try {
+          const res = await fetch(`/posts/like/${postId}/`, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token },
+          });
+          if (!res.ok) throw new Error("Like failed");
+          await fetchPosts();
+        } catch (err) {
+          showError(String(err));
+        }
+        return;
+      }
+
+      const followBtn = e.target?.closest?.("[data-follow]");
+      if (followBtn) {
+        const authorId = followBtn.getAttribute("data-follow");
+        const token = getAccessToken();
+        if (!token) return showError("Login required to follow.");
+        clearError();
+        try {
+          const res = await fetch(`/posts/follow/${authorId}/`, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token },
+          });
+          if (!res.ok) throw new Error("Follow failed");
+          await fetchPosts();
+        } catch (err) {
+          showError(String(err));
+        }
+        return;
+      }
+
+      const unfollowBtn = e.target?.closest?.("[data-unfollow]");
+      if (unfollowBtn) {
+        const authorId = unfollowBtn.getAttribute("data-unfollow");
+        const token = getAccessToken();
+        if (!token) return showError("Login required to unfollow.");
+        clearError();
+        try {
+          const res = await fetch(`/posts/follow/${authorId}/unfollow/`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + token },
+          });
+          if (!res.ok) throw new Error("Unfollow failed");
+          await fetchPosts();
+        } catch (err) {
+          showError(String(err));
+        }
+        return;
+      }
+
+      const focusBtn = e.target?.closest?.("[data-focus-comments]");
+      if (focusBtn) {
+        const postId = focusBtn.getAttribute("data-focus-comments");
+        clearError();
+        document.getElementById(`commentBox-${postId}`).style.display = "block";
+        document.getElementById(`commentInput-${postId}`).focus();
+        return;
+      }
+
+      const cancelBtn = e.target?.closest?.("[data-cancel-comment]");
+      if (cancelBtn) {
+        const postId = cancelBtn.getAttribute("data-cancel-comment");
+        document.getElementById(`commentBox-${postId}`).style.display = "none";
+        return;
+      }
+
+      const sendBtn = e.target?.closest?.("[data-send-comment]");
+      if (sendBtn) {
+        const postId = sendBtn.getAttribute("data-send-comment");
+        const input = document.getElementById(`commentInput-${postId}`);
+        const token = getAccessToken();
+        if (!token) return showError("Login required to comment.");
+        const text = (input.value || "").trim();
+        if (!text) return showError("Please write a comment.");
+
+        clearError();
+        try {
+          const res = await fetch(`/posts/comments/${postId}/`, {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer " + token,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text }),
+          });
+          if (!res.ok) throw new Error("Comment failed");
+          await fetchPosts();
+        } catch (err) {
+          showError(String(err));
+        }
+      }
+    });
+
+    syncAuthUI();
+    fetchPosts();
+  </script>
+{% endblock %}
+

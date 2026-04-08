@@ -40,6 +40,7 @@ def generate_otp():
 
 
 #! send  verify email
+
 @shared_task
 def send_verification_email(email, uid, token):
     

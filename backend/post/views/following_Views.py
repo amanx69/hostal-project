@@ -1,6 +1,7 @@
 from  rest_framework.views import  APIView
 from  rest_framework.response import Response
 from  rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from  post.serializers import follower_serializer
 from  post.models import FollowingSystem_model
 from  django.shortcuts import get_object_or_404
@@ -12,6 +13,7 @@ from  users.models import User
 
 
 class Follow(APIView):
+    permission_classes = [IsAuthenticated]
    
     def post( self,request,user_id):
         
@@ -41,6 +43,7 @@ class Follow(APIView):
 
 
 class unfollow(APIView):
+    permission_classes = [IsAuthenticated]
     
     def delete(self,request,user_id):
        following= get_object_or_404(User,pk= user_id)
@@ -55,9 +58,43 @@ class unfollow(APIView):
 
 
 
- #TODO ADD  THE GIVE FOLLOER LIST AND FOLLOWING LIST
-    
-       
-   
-   
-   
+# TODO: add richer paging + include user profile data
+
+
+class FollowingList(APIView):
+    """
+    GET users that `user_id` is following.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id: int):
+        following_qs = FollowingSystem_model.FollowingSystem.objects.filter(
+            follower_id=user_id
+        ).select_related("following")
+
+        users = [
+            {"id": rel.following.id, "email": rel.following.email}
+            for rel in following_qs
+        ]
+        return Response({"users": users}, status=status.HTTP_200_OK)
+
+
+class FollowersList(APIView):
+    """
+    GET users that follow `user_id`.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id: int):
+        followers_qs = FollowingSystem_model.FollowingSystem.objects.filter(
+            following_id=user_id
+        ).select_related("follower")
+
+        users = [
+            {"id": rel.follower.id, "email": rel.follower.email}
+            for rel in followers_qs
+        ]
+        return Response({"users": users}, status=status.HTTP_200_OK)
+
