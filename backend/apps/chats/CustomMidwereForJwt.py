@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import UntypedToken
 from jwt import InvalidTokenError
 from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
-from  users.models import User
+from  apps.users.models import User
 
 
 

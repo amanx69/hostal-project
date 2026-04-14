@@ -74,6 +74,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+ASGI_APPLICATION =  "config.asgi.application"
 
 TEMPLATES = [
     {
@@ -91,8 +92,7 @@ TEMPLATES = [
 ]
 
 
-ASGI_APPLICATION =  "config.asgi.application"
-WAGI_APPLICATION =  "config.wsgi.application"
+
 
 
 
