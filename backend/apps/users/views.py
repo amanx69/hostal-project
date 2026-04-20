@@ -36,7 +36,6 @@ def get_token(user):
     } 
 
 
-
 class Signup(APIView):
     throttle_scope = 'signup'  #! for  signup throtling
     

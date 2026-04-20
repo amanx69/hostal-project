@@ -4,6 +4,7 @@ import uuid
 
 
 User= get_user_model()
+
 class GroupesChat(models.Model):
     private= models.BooleanField(default=False)
     groupe_name= models.CharField(max_length=100,blank=False,null=False)
