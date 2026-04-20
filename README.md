@@ -43,7 +43,7 @@ venv\Scripts\activate      # Windows
 ```bash
 git clone https://github.com/amanx69/hostal-project/
 cd hostal-project
-pip install -r requirements.txt
+pip install -r req.txt
 
 # than setup .env
 
