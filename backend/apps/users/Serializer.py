@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import User
 import re
 from rest_framework.exceptions import ValidationError
-
+from service.gernateToken import  generate_verification_token
+from  service.SendEmail import  send_verification_email
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -25,8 +26,12 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"password": "Password is required"})
 
         user = User.objects.create_user( password=password, **validated_data)
+         # SendWelcomeEmail.delay(email)#! send the  email 
+        uid, token = generate_verification_token(user) #! gernate token 
+        print(uid, token)
+        send_verification_email.delay(email,uid,token)#! send the  email
         return user
-
+    
 
     def validate_password(self, value):
         if len(value) < 8:

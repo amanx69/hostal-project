@@ -31,6 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+
 AUTH_USER_MODEL = "users.User"  # custom user model
 
 
@@ -55,7 +56,6 @@ INSTALLED_APPS = [
     ##! my apps
     "apps.users",
     'apps.post',
-    'apps.LoginDetiles',
     'apps.chats',
     'apps.Home',
     'apps.complains',
@@ -67,12 +67,13 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
+CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = "config.urls"
 ASGI_APPLICATION =  "config.asgi.application"
 

@@ -38,13 +38,12 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("auth/", include("apps.users.urls")),
+    path("api/auth/", include("apps.users.urls")),
      # new
-    path("Logind/", include("apps.LoginDetiles.urls")),  # new
-    path("posts/", include("apps.post.urls")),
-    path("chats/",include("apps.chats.urls")), 
-    path("pro/",include("apps.Profile.urls")),  
-    path("comp/",include("apps.complains.urls")),
+    path("api/posts/", include("apps.post.urls")),
+    path("api/chats/",include("apps.chats.urls")), 
+    path("api/pro/",include("apps.Profile.urls")),  
+    path("api/comp/",include("apps.complains.urls")),
     # Django template web UI (login/signup/posts feed)
     path("", include("apps.Home.urls")),
     
@@ -67,3 +66,4 @@ if settings.DEBUG:
     from django.conf.urls.static import static
 
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+ 

@@ -1,4 +1,3 @@
-from  django.core.mail import send_mail
 from django.conf import settings
 import  random
 from  celery import shared_task
@@ -45,6 +44,7 @@ def generate_otp():
 def send_verification_email(email, uid, token):
     
     link = f"http://localhost:8000/auth/verify-email/{uid}/{token}/"
+    print(link)
 
     html = f"""
     <h2>Verify your email</h2>
