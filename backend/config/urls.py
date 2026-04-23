@@ -42,7 +42,7 @@ urlpatterns = [
      # new
     path("api/posts/", include("apps.post.urls")),
     path("api/chats/",include("apps.chats.urls")), 
-    path("api/pro/",include("apps.Profile.urls")),  
+    path("api/Profile/",include("apps.Profile.urls")),  
     path("api/comp/",include("apps.complains.urls")),
     # Django template web UI (login/signup/posts feed)
     path("", include("apps.Home.urls")),

@@ -32,11 +32,6 @@ def generate_otp():
     otp_code = ''.join(random.choices('0123456789', k=6))
     return otp_code
 
-
-
-
-
-
 #! send  verify email
 
 @shared_task
