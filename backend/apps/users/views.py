@@ -2,6 +2,7 @@ from  rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .Serializer import UserSerializer
+from rest_framework.permissions import  IsAuthenticated
 from .models import User
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -12,9 +13,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
 from .Serializer import LoginSerializer
 from service.gernateToken import generate_verification_token 
-from  service.SendEmail import send_verification_email
+from  service.SendEmail import send_verification_email ,SendWelcomeEmail
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
+from django.utils.encoding import force_str
 
 User= get_user_model()
 #! FOR  TOKEN  gerneted
@@ -106,7 +108,7 @@ class VerifyEmail(APIView):
             if default_token_generator.check_token(user, token):
                 user.is_verified = True
                 user.save()
-                     
+                # update_last_login(None, user)
                 token= get_token(user)
                 
                 return Response({
@@ -124,7 +126,7 @@ class VerifyEmail(APIView):
         
 class ResendVerificationView(APIView):
     """Resend the email verification link for an unverified account."""
-    authentication_classes = []
+    authentication_classes = [IsAuthenticated]
     permission_classes = []
     #@method_decorator(ratelimit(key="ip", rate=config("resend_email_verification"), block=True, method="POST"))
    # @method_decorator(ratelimit(key="post:email", rate="3/m", block=True, method="POST"))
@@ -156,3 +158,87 @@ class ResendVerificationView(APIView):
             {"message": "Verification link sent to your email."},
             status=status.HTTP_200_OK,
         )
+
+
+#! for request change password
+class RequestPasswordResetView(APIView):
+    permission_classes = [IsAuthenticated]
+    @method_decorator(ratelimit(key='ip', rate='3/m', method='POST'))
+    def post(self, request):
+        email = request.data.get('email')
+        if  not email:
+            return Response({
+                "error":"email is required"
+            },status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not (security)
+            return Response({'detail': 'email are not exiest.'})
+
+        
+        uid, token = generate_verification_token(user)
+
+        SendWelcomeEmail.delay(email=user.email, uid=uid, token=token)
+
+      
+        return Response({
+            'detail':  " reset link was sent on you email.",
+            "status": 200,
+            },status.HTTP_200_OK)
+class ConfirmPasswordResetView(APIView):
+    permission_classes = [IsAuthenticated]
+    @method_decorator(ratelimit(key='ip', rate='3/m', method='POST'))
+    def post(self, request,uid,token):
+        new_password = request.data.get('new_password')
+        if not new_password:
+            return Response({
+                "error":"password is required"
+            })
+
+        try:
+            
+            user_pk = force_str(urlsafe_base64_decode(uid))
+            user = User.objects.get(pk=user_pk)
+        except (User.DoesNotExist, ValueError):
+            return Response({'detail': 'Invalid link.'}, status=400)
+
+        #! Verify token
+        if not default_token_generator.check_token(user, token):
+            return Response({'detail': 'Invalid or expired token.'}, status=400)
+
+        # Set new password
+        user.set_password(new_password)  # hashes automatically
+        user.save()
+
+        return Response({'detail': 'Password reset successful.'})
+    
+    
+    #! fro logout
+    
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.data.get('refresh')
+
+        if not refresh_token:
+            return Response(
+                {'detail': 'Refresh token is required.'}, 
+                status=400
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()  
+        except TokenError:
+            return Response(
+                {'detail': 'Invalid or expired token.'}, 
+                status=400
+            )
+
+        return Response({'detail': 'Logged out successfully.'})

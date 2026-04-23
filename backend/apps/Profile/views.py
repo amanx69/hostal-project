@@ -10,7 +10,8 @@ from apps.post.serializers.post_Serializer import PostSerializer
 from .Serializer import ProfileSerializer
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
 
 @api_view(["GET"])
@@ -109,11 +110,12 @@ def get_user_profile(request):
 
 class UpdateProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+    @method_decorator(ratelimit(key='ip', rate='2/m', method='POST'))
+
     def patch(self,request):
         profile= get_object_or_404(userProfile,user=request.user)
         ser= ProfileSerializer(profile,data=request.data,partial=True, context={'request': request})
-        if ser.is_valid():
+        if ser.is_valid(raise_exception= True):
             ser.save()
             return Response({
                 "stutas": "success",
@@ -125,6 +127,7 @@ class UpdateProfileView(APIView):
     
  #! rating the resume   
 @api_view(["GET"])
+@method_decorator(ratelimit(key='ip', rate='4/m', method='GET'))
 @permission_classes([permissions.IsAuthenticated])
 def resume_rating(request)->Response:
     resume= request.FILES["resume"] if "resume" in request.FILES else None

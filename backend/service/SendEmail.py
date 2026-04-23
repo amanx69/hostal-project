@@ -4,29 +4,28 @@ from  celery import shared_task
 from  django.template.loader import render_to_string
 from  django.core.mail import EmailMultiAlternatives
 
-
+#TODO this fuction for send passwword reset chnage name in later 
 @shared_task   
-def SendWelcomeEmail(email:str):
-    subject = "Welcome 🚀"
-    from_email = settings.EMAIL_HOST_USER
-    to = [email]
+def SendWelcomeEmail(email ,uid,token):
+    link = f"http://localhost:8000/api/auth/password-reset/confirm/{uid}/{token}/"
+    print(link)
 
-    html_content = render_to_string("email/Welcome.html", {
-        "email": email,
-    })
+    html = f"""
+    <h2>for reset your password</h2>
+    <p>Click below:</p>
+    <a href="{link}">Verify Email</a>
+    """
 
-    msg = EmailMultiAlternatives(subject, "", from_email, to)
-    msg.attach_alternative(html_content, "text/html")
+    msg = EmailMultiAlternatives(
+        "Verify your email",
+        "Click link to verify",
+        "noreply@yourapp.com",
+        [email]
+    )
+    msg.attach_alternative(html, "text/html")
     msg.send()
-    
-        
-#     """        subject = "Welcome to Our App!"
-#             message = f"Hi {email},\n\nThank you for registering with us!"
-#             from_email = settings.EMAIL_HOST_USER
-#             recipient_list = [email]
+   
 
-#             send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-#  """
 
 
 def generate_otp():
@@ -43,7 +42,7 @@ def generate_otp():
 @shared_task
 def send_verification_email(email, uid, token):
     
-    link = f"http://localhost:8000/auth/verify-email/{uid}/{token}/"
+    link = f"http://localhost:8000/api/auth/verify-email/{uid}/{token}/"
     print(link)
 
     html = f"""
