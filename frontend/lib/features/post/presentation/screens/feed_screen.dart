@@ -35,13 +35,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    // Filter out current user's own posts
-    final currentUserId = myProfile.profile?.userId;
-    final filteredPosts = currentUserId != null
-        ? feedState.posts
-            .where((p) => p.authorUserId != currentUserId)
-            .toList()
-        : feedState.posts;
+    // Do not filter out current user's own posts
+    final filteredPosts = feedState.posts;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
@@ -262,17 +257,10 @@ class _FeedAppBar extends StatelessWidget implements PreferredSizeWidget {
 
             // ── Messages icon ──────────────────────────────────────────────
             _AppBarBtn(
-              icon: Icons.chat_bubble_outline_rounded,
+              icon: Icons.maps_ugc_rounded,
               color: iconColor,
               badge: true,
-              onTap: () {}, // wire to chat screen later
-            ),
-
-            // ── Notifications icon ─────────────────────────────────────────
-            _AppBarBtn(
-              icon: Icons.notifications_none_rounded,
-              color: iconColor,
-              onTap: () {},
+              onTap: () => context.push('/chat'),
             ),
 
             // ── More ──────────────────────────────────────────────────────

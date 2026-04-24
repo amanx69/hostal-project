@@ -30,12 +30,18 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final picked = await _picker.pickImage(
-      source: source,
+  Future<void> _pickMedia(ImageSource source) async {
+    final picked = await _picker.pickMedia(
       imageQuality: 85,
-      maxWidth: 1200,
     );
+    if (picked != null) {
+      setState(() => _selectedImage = File(picked.path));
+    }
+  }
+
+  Future<void> _pickCameraMedia() async {
+    // For camera, we'll stick to pickImage for simplicity unless pickVideo is also desired.
+    final picked = await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
     if (picked != null) {
       setState(() => _selectedImage = File(picked.path));
     }
@@ -174,7 +180,13 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     ? Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.file(_selectedImage!, fit: BoxFit.cover),
+                          if (_selectedImage!.path.toLowerCase().endsWith('.mp4') || _selectedImage!.path.toLowerCase().endsWith('.mov'))
+                            Container(
+                              color: Colors.black87,
+                              child: const Center(child: Icon(Icons.play_circle_fill, color: Colors.white, size: 64)),
+                            )
+                          else
+                            Image.file(_selectedImage!, fit: BoxFit.cover),
                           Positioned(
                             top: 10,
                             right: 10,
@@ -333,16 +345,16 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                 title: const Text('Camera'),
                 onTap: () {
                   Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
+                  _pickCameraMedia();
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_rounded,
                     color: AppColors.accent),
-                title: const Text('Gallery'),
+                title: const Text('Gallery (Photo/Video)'),
                 onTap: () {
                   Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
+                  _pickMedia(ImageSource.gallery);
                 },
               ),
             ],

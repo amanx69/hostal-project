@@ -53,6 +53,7 @@ class MyProfileScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: _XProfileHeader(
                   avatarUrl: profile.profilePicture,
+                  coverUrl: profile.coverImage,
                   username: profile.username,
                   isOwn: true,
                   isDark: isDark,
@@ -183,6 +184,7 @@ class MyProfileScreen extends ConsumerWidget {
 /// Cover banner + avatar section (X layout)
 class _XProfileHeader extends StatelessWidget {
   final String? avatarUrl;
+  final String? coverUrl;
   final String username;
   final bool isOwn;
   final bool isDark;
@@ -191,6 +193,7 @@ class _XProfileHeader extends StatelessWidget {
 
   const _XProfileHeader({
     required this.avatarUrl,
+    this.coverUrl,
     required this.username,
     required this.isOwn,
     required this.isDark,
@@ -200,8 +203,6 @@ class _XProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isDark ? AppColors.surfaceDark : Colors.white;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -210,7 +211,7 @@ class _XProfileHeader extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             // Banner itself
-            _CoverBanner(username: username, isDark: isDark),
+            _CoverBanner(coverUrl: coverUrl, username: username, isDark: isDark),
 
             // Top row (back + settings)
             if (topAction != null)
@@ -249,29 +250,61 @@ class _XProfileHeader extends StatelessWidget {
 
 /// Cover banner: blurred avatar as bg, or gradient fallback
 class _CoverBanner extends StatelessWidget {
+  final String? coverUrl;
   final String username;
   final bool isDark;
 
-  const _CoverBanner({required this.username, required this.isDark});
+  const _CoverBanner({
+    this.coverUrl,
+    required this.username,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
     final hue = username.isNotEmpty ? (username.codeUnitAt(0) * 137) % 360 : 0;
+
+    // Gradient fallback decoration
+    final gradientDecoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          HSLColor.fromAHSL(1, hue.toDouble(), 0.55, isDark ? 0.30 : 0.42)
+              .toColor(),
+          AppColors.primary,
+          AppColors.accent,
+        ],
+      ),
+    );
+
+    if (coverUrl != null && coverUrl!.isNotEmpty) {
+      return SizedBox(
+        height: 150,
+        width: double.infinity,
+        child: Image.network(
+          coverUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            height: 150,
+            width: double.infinity,
+            decoration: gradientDecoration,
+          ),
+          loadingBuilder: (_, child, progress) => progress == null
+              ? child
+              : Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: gradientDecoration,
+                ),
+        ),
+      );
+    }
+
     return Container(
       height: 150,
       width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            HSLColor.fromAHSL(1, hue.toDouble(), 0.55, isDark ? 0.30 : 0.42)
-                .toColor(),
-            AppColors.primary,
-            AppColors.accent,
-          ],
-        ),
-      ),
+      decoration: gradientDecoration,
     );
   }
 }

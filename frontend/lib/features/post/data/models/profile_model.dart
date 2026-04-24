@@ -6,6 +6,7 @@ class UserProfile {
   final String username;
   final String email;
   final String? profilePicture;
+  final String? coverImage; // profile_cover from backend
   final String? bio;
   final String? location;
   final String? phoneNumber;
@@ -20,6 +21,7 @@ class UserProfile {
     required this.username,
     required this.email,
     this.profilePicture,
+    this.coverImage,
     this.bio,
     this.location,
     this.phoneNumber,
@@ -40,6 +42,7 @@ class UserProfile {
       username: profileData['username'] as String? ?? 'Unknown',
       email: profileData['email'] as String? ?? '',
       profilePicture: profileData['profile_picture'] as String?,
+      coverImage: profileData['profile_cover'] as String?,
       bio: profileData['bio'] as String?,
       location: profileData['location'] as String?,
       phoneNumber: profileData['phone_number'] as String?,
@@ -52,13 +55,18 @@ class UserProfile {
     );
   }
 
-  UserProfile copyWith({bool? isFollowing, int? followersCount, int? followingCount}) {
+  UserProfile copyWith({
+    bool? isFollowing,
+    int? followersCount,
+    int? followingCount,
+  }) {
     return UserProfile(
       id: id,
       userId: userId,
       username: username,
       email: email,
       profilePicture: profilePicture,
+      coverImage: coverImage,
       bio: bio,
       location: location,
       phoneNumber: phoneNumber,

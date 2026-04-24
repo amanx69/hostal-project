@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 import '../models/post_model.dart';
@@ -12,9 +15,16 @@ class PostRemoteDataSource {
 
   Future<List<Post>> fetchPosts() async {
     final res = await _dio.get('/api/posts/posts/');
-    final data = res.data;
+    dynamic data = res.data;
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {}
+    }
     List<dynamic> results;
-    if (data is Map && data.containsKey('results')) {
+    if (data is Map && data.containsKey('posts')) {
+      results = data['posts'] as List<dynamic>;
+    } else if (data is Map && data.containsKey('results')) {
       results = data['results'] as List<dynamic>;
     } else if (data is List) {
       results = data;
@@ -43,7 +53,11 @@ class PostRemoteDataSource {
       data: formData,
       options: Options(contentType: 'multipart/form-data'),
     );
-    return Post.fromJson(res.data as Map<String, dynamic>);
+    final data = res.data as Map<String, dynamic>;
+    if (data.containsKey('post')) {
+      return Post.fromJson(data['post'] as Map<String, dynamic>);
+    }
+    return Post.fromJson(data);
   }
 
   // ─── Delete post ──────────────────────────────────────────────────────────
@@ -88,6 +102,7 @@ class PostRemoteDataSource {
 
   Future<UserProfile> fetchMyProfile() async {
     final res = await _dio.get('/api/Profile/profile/');
+    print(res.data);
     return UserProfile.fromJson(res.data as Map<String, dynamic>);
   }
 

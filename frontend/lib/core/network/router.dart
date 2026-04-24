@@ -16,6 +16,9 @@ import '../../features/post/presentation/screens/my_profile_screen.dart';
 import '../../features/post/presentation/screens/search_screen.dart';
 import '../../features/post/presentation/screens/user_profile_screen.dart';
 import '../../features/shell/app_shell.dart';
+import '../../features/chat/presentation/screens/chat_list_screen.dart';
+import '../../features/chat/presentation/screens/chat_room_screen.dart';
+import '../../features/chat/presentation/screens/new_chat_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterNotifier(ref);
@@ -41,6 +44,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/verify-success',
           builder: (_, __) => const VerificationSuccessScreen()),
+
+      // ── Chat routes ──────────────────────────────────────────────────────
+      GoRoute(path: '/chat', builder: (_, __) => const ChatListScreen()),
+      GoRoute(path: '/chat/new', builder: (_, __) => const NewChatScreen()),
+      GoRoute(
+        path: '/chat/:roomId',
+        builder: (_, state) {
+          final roomId = int.parse(state.pathParameters['roomId']!);
+          final name = state.uri.queryParameters['name'];
+          return ChatRoomScreen(roomId: roomId, roomName: name);
+        },
+      ),
 
       // ── Main shell — 4 tabs: Home | Search | Create | Profile ─────────────
       StatefulShellRoute.indexedStack(

@@ -52,6 +52,7 @@ class UserProfileScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: _XProfileHeader(
                 avatarUrl: profile.profilePicture,
+                coverUrl: profile.coverImage,
                 username: profile.username,
                 isDark: isDark,
                 trailing: _XFollowBtn(
@@ -146,6 +147,7 @@ class UserProfileScreen extends ConsumerWidget {
 
 class _XProfileHeader extends StatelessWidget {
   final String? avatarUrl;
+  final String? coverUrl;
   final String username;
   final bool isDark;
   final Widget? trailing;
@@ -153,6 +155,7 @@ class _XProfileHeader extends StatelessWidget {
 
   const _XProfileHeader({
     required this.avatarUrl,
+    this.coverUrl,
     required this.username,
     required this.isDark,
     this.trailing,
@@ -168,7 +171,7 @@ class _XProfileHeader extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            _CoverBanner(username: username, isDark: isDark),
+            _CoverBanner(coverUrl: coverUrl, username: username, isDark: isDark),
 
             if (topAction != null)
               Positioned(
@@ -200,31 +203,59 @@ class _XProfileHeader extends StatelessWidget {
 }
 
 class _CoverBanner extends StatelessWidget {
+  final String? coverUrl;
   final String username;
   final bool isDark;
 
-  const _CoverBanner({required this.username, required this.isDark});
+  const _CoverBanner({
+    this.coverUrl,
+    required this.username,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
     final hue =
         username.isNotEmpty ? (username.codeUnitAt(0) * 137) % 360 : 0;
+
+    final gradientDecoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          HSLColor.fromAHSL(1, hue.toDouble(), 0.55, isDark ? 0.28 : 0.40)
+              .toColor(),
+          AppColors.primary,
+          AppColors.accent,
+        ],
+      ),
+    );
+
+    if (coverUrl != null && coverUrl!.isNotEmpty) {
+      return SizedBox(
+        height: 150,
+        width: double.infinity,
+        child: Image.network(
+          coverUrl!,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            height: 150,
+            decoration: gradientDecoration,
+          ),
+          loadingBuilder: (_, child, progress) => progress == null
+              ? child
+              : Container(
+                  height: 150,
+                  decoration: gradientDecoration,
+                ),
+        ),
+      );
+    }
+
     return Container(
       height: 150,
       width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            HSLColor.fromAHSL(
-                    1, hue.toDouble(), 0.55, isDark ? 0.28 : 0.40)
-                .toColor(),
-            AppColors.primary,
-            AppColors.accent,
-          ],
-        ),
-      ),
+      decoration: gradientDecoration,
     );
   }
 }

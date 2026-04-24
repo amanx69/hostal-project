@@ -1,1 +1,3 @@
 python -m celery -A backend worker --loglevel=info
+
+ celery -A config  flower --port=5555

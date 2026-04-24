@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../data/models/post_model.dart';
 import '../../../../../core/theme/app_theme.dart';
@@ -114,41 +115,9 @@ class _PostCardState extends State<PostCard>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Image.network(
-                    post.media!,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (_, child, progress) => progress == null
-                        ? child
-                        : AspectRatio(
-                            aspectRatio: 4 / 3,
-                            child: Container(
-                              color: isDark
-                                  ? AppColors.borderDark
-                                  : const Color(0xFFF0F0F0),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: progress.expectedTotalBytes != null
-                                      ? progress.cumulativeBytesLoaded /
-                                          progress.expectedTotalBytes!
-                                      : null,
-                                  strokeWidth: 2,
-                                  color: cs.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                    errorBuilder: (_, __, ___) => Container(
-                      height: 220,
-                      color: isDark
-                          ? AppColors.borderDark
-                          : const Color(0xFFF0F0F0),
-                      child: Center(
-                        child: Icon(Icons.broken_image_outlined,
-                            size: 40,
-                            color: cs.onSurface.withValues(alpha: 0.3)),
-                      ),
-                    ),
+                  _MediaViewer(
+                    url: post.media!,
+                    isDark: isDark,
                   ),
                   // Double-tap heart overlay
                   if (_showDoubleTapHeart)
@@ -798,9 +767,107 @@ class _MiniAvatar extends StatelessWidget {
             ? Image.network(
                 url!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _Initials(initials, size),
               )
-            : _Initials(initials, size),
+            : Container(
+                color: AppColors.primary,
+                alignment: Alignment.center,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+// ─── Media Viewer ─────────────────────────────────────────────────────────────
+
+class _MediaViewer extends StatefulWidget {
+  final String url;
+  final bool isDark;
+
+  const _MediaViewer({required this.url, required this.isDark});
+
+  @override
+  State<_MediaViewer> createState() => _MediaViewerState();
+}
+
+class _MediaViewerState extends State<_MediaViewer> {
+  VideoPlayerController? _controller;
+  bool _isVideo = false;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final lowerUrl = widget.url.toLowerCase();
+    _isVideo = lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov') || lowerUrl.endsWith('.avi');
+    
+    if (_isVideo) {
+      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+        ..initialize().then((_) {
+          if (mounted) setState(() => _isInitialized = true);
+          _controller?.setLooping(true);
+          _controller?.play();
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isVideo) {
+      return Image.network(
+        widget.url,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        loadingBuilder: (_, child, progress) => progress == null
+            ? child
+            : AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Container(
+                  color: widget.isDark ? AppColors.borderDark : const Color(0xFFF0F0F0),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: progress.expectedTotalBytes != null
+                          ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                          : null,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                ),
+              ),
+        errorBuilder: (_, __, ___) => Container(
+          height: 220,
+          color: widget.isDark ? AppColors.borderDark : const Color(0xFFF0F0F0),
+          child: const Center(
+            child: Icon(Icons.broken_image_outlined, size: 40, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
+    if (_isInitialized && _controller != null) {
+      return AspectRatio(
+        aspectRatio: _controller!.value.aspectRatio,
+        child: VideoPlayer(_controller!),
+      );
+    }
+
+    return Container(
+      height: 300,
+      color: Colors.black87,
+      child: const Center(
+        child: CircularProgressIndicator(color: Colors.white),
       ),
     );
   }
