@@ -14,16 +14,13 @@ from django.urls import re_path
 
 
 from apps.chats.CustomMidwereForJwt import JWTAuthMiddleware
-print("ok")
-
+import apps.chats.routing
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": JWTAuthMiddleware(
-        URLRouter([
-            
-        ]
-          
-    )
+        URLRouter(
+            apps.chats.routing.websocket_urlpatterns
+        )
     )
 })

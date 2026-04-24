@@ -8,6 +8,7 @@ from  apps.users.Serializer import UserSerializer
 from  drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser
+from service.response import success_response as _success, error_response as _error
 
 User=get_user_model()
 
@@ -21,16 +22,10 @@ def create_groupe(request):
     image = request.FILES.get('profile_image')
     
     if not Groupe_name or Groupe_name.strip() == "":
-        return Response({
-            "error":"Groupe name cannot be empty."
-        },status=status.HTTP_400_BAD_REQUEST)
-        
-        #! if groupe name is exit
+        return _error("Groupe name cannot be empty.", http_status=status.HTTP_400_BAD_REQUEST)
         
     if GroupeChatModel.GroupesChat.objects.filter(groupe_name=Groupe_name).exists():
-        return Response({
-            "error":"Groupe name already exists."
-        },status=status.HTTP_400_BAD_REQUEST)
+        return _error("Groupe name already exists.", http_status=status.HTTP_400_BAD_REQUEST)
         
     groupe= GroupeChatModel.GroupesChat.objects.create(
         groupe_name= Groupe_name,
@@ -38,12 +33,12 @@ def create_groupe(request):
         groupe_profile_image= image or None
     )
     groupe.members.add(request.user)
-    return Response({
-        "message":"Groupe created successfully",
+    return _success({
+        "message": "Groupe created successfully",
         "groupe_id": groupe.id,
         "groupe_name": groupe.groupe_name,
-        "ownner": groupe.owner.email
-    })
+        "owner": groupe.owner.email
+    }, http_status=status.HTTP_201_CREATED)
     
     
     

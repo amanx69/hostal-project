@@ -47,15 +47,19 @@ class PostSerializer(serializers.ModelSerializer):
         #! compress the image  if  it is  present
         image = data.get('media')
         imagename= getattr(image, 'name', None) #! image name
-        print(f"Received image: {imagename}")
+        print(f"Received media: {imagename}")
+        
        #! image  compression  process
-        if image:
-            try:
-                compressed_image = process_image(image, imagename)
-                data['media'] = compressed_image
-                print("Image compressed successfully")
-            except Exception as e:
-                raise serializers.ValidationError(f"Image compression failed: {str(e)}")
+        if image and imagename:
+            if imagename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                try:
+                    compressed_image = process_image(image, imagename)
+                    data['media'] = compressed_image
+                    print("Image compressed successfully")
+                except Exception as e:
+                    raise serializers.ValidationError(f"Image compression failed: {str(e)}")
+            else:
+                print("Skipping compression for non-image or video file")
         
         if not data.get('title') and not data.get('dec'):
             raise serializers.ValidationError("Either title or description must be provided.")

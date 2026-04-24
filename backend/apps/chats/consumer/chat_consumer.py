@@ -15,8 +15,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.user= self.scope['user']
         
        
-        self.room_id=self.scope['url_route']['kwargs']['chat_id'] #~ room  id 
-        self.groupe_name= 'chat_%s' % self.room_id  #~ room name for  channel layer
+        self.room_id = int(self.scope['url_route']['kwargs']['chat_id']) #~ room id 
+        self.groupe_name = 'chat_%s' % self.room_id  #~ room name for channel layer
       
         
         
@@ -32,17 +32,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
       
         await self.accept()
         
-        
-       
-        
-        await self.send(text_data=f"you are connected to {self.groupe_name} ")
-        
-    async def disconnect(self ):
+    async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.groupe_name,
             self.channel_name,
-        )
-        await self.send(text_data="you are disconnected")                                               
+        )                                               
 
     #! handle receive  message  from  websocket
     
@@ -62,20 +56,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.groupe_name,
             {
-                "type":"chat_message",
-                "msg":msg,
+                "type": "chat_message",
+                "msg": msg,
                 "sender_id": sender_id,
-                "room_id":room_id
-                
+                "room_id": room_id,
+                "sender_email": self.user.email,
             }
          )
-        #! messgae  save  in db
-    async def chat_message(self,event):
+         
+    #! message save in db
+    async def chat_message(self, event):
          await self.send(text_data=json.dumps({
             'message': event['msg'],
             'sender_id': event['sender_id'],
-            "room_id":event['room_id'],
-            "sender_email": self.user.email,
+            "room_id": event['room_id'],
+            "sender_email": event.get('sender_email', ''),
         }))
 
 

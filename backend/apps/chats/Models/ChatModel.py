@@ -14,8 +14,8 @@ class ChatRoom(models.Model):
         unique_together = ('user1', 'user2')
         
         
-    def __int__(self):
-        return f"{self.user1,id} - {self.user2.id}"
+    def __str__(self):
+        return f"{self.user1.id} - {self.user2.id}"
     
     
     
