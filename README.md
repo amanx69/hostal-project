@@ -40,7 +40,8 @@ venv\Scripts\activate      # Windows
 
 ### 1. Clone Repository
 
-#bash
+# bash
+
 git clone https://github.com/amanx69/hostal-project/
 cd hostal-project
 pip install -r req.txt
@@ -58,7 +59,7 @@ email_host= "your host email"
 email_pass= "your gmail service pass not real pass"
 
 
-#! than run in bash
+ # than run in bash
 python manage.py makemigrations
 python manage.py migrate
 
@@ -116,7 +117,8 @@ pip install -r req.txt
 
 
 Sc= "gernate you sc"
-#email
+
+# email
 
 email_b= django.core.mail.backends.smtp.EmailBackend
 email_h= smtp.gmail.com
@@ -125,10 +127,11 @@ email_host= "your host email"
 email_pass= "your gmail service pass not real pass"
 
 
-#! than run in bash
+#  than run in bash
 python manage.py makemigrations
 python manage.py migrate
 
-#in your root project 
+# in your root project 
+
 python manage.py runserver
->>>>>>> 2da3bbe (work on frontend)
+
