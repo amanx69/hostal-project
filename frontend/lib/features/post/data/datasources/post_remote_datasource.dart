@@ -110,4 +110,12 @@ class PostRemoteDataSource {
     final res = await _dio.get('/api/Profile/profile/$userId/');
     return UserProfile.fromJson(res.data as Map<String, dynamic>);
   }
+
+  Future<void> updateProfile(FormData formData) async {
+    await _dio.patch(
+      '/api/Profile/profile/update/',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+  }
 }

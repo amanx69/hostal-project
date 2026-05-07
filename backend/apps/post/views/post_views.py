@@ -25,9 +25,7 @@ class PostViewSet(ModelViewSet):
             return [IsAuthenticated()]
         return [IsAuthenticatedOrReadOnly()]
 
-    # -----------------------------------------------------------------------
-    # List — cache the global feed for 30 seconds
-    # -----------------------------------------------------------------------
+   
     def list(self, request, *args, **kwargs):
         cache_key = "post_feed"
         cached = cache.get(cache_key)
@@ -59,9 +57,6 @@ class PostViewSet(ModelViewSet):
         cache.set(cache_key, data, timeout=60)
         return Response({"success": True, "post": data}, status=status.HTTP_200_OK)
 
-    # -----------------------------------------------------------------------
-    # Create
-    # -----------------------------------------------------------------------
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -76,9 +71,7 @@ class PostViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    # -----------------------------------------------------------------------
     # Update
-    # -----------------------------------------------------------------------
     def perform_update(self, serializer):
         post = self.get_object()
         if post.user != self.request.user:
@@ -88,9 +81,7 @@ class PostViewSet(ModelViewSet):
         cache.delete("post_feed")
         cache.delete(f"post_{post.pk}")
 
-    # -----------------------------------------------------------------------
     # Destroy
-    # -----------------------------------------------------------------------
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.user != request.user:

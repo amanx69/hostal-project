@@ -78,6 +78,6 @@ class ChatApi {
     final res = await _dio.post('/api/chats/$groupId/add_users/', data: {
       'users': userIds,
     });
-    // Assuming backend returns 200/201 on success
+    
   }
 }

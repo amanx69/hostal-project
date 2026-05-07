@@ -59,7 +59,7 @@ class MyProfileScreen extends ConsumerWidget {
                   isDark: isDark,
                   trailing: _XOutlineBtn(
                     label: 'Edit profile',
-                    onTap: () {},
+                    onTap: () => context.go('/me/edit'),
                   ),
                   topAction: Row(
                     children: [
@@ -70,8 +70,8 @@ class MyProfileScreen extends ConsumerWidget {
                       ),
                       const Spacer(),
                       _CircleBtn(
-                        icon: Icons.logout_rounded,
-                        onTap: () => _confirmLogout(context, ref),
+                        icon: Icons.settings_rounded,
+                        onTap: () => _showSettings(context, ref, isDark),
                         isDark: isDark,
                       ),
                     ],
@@ -174,6 +174,47 @@ class MyProfileScreen extends ConsumerWidget {
     if (confirmed == true) {
       ref.read(authControllerProvider.notifier).logout();
     }
+  }
+
+  void _showSettings(BuildContext context, WidgetRef ref, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout_rounded, color: AppColors.error),
+              title: const Text(
+                'Sign out',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _confirmLogout(context, ref);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
   }
 }
 

@@ -1,4 +1,17 @@
 // Data model matching backend PostSerializer response
+import '../../../../core/constants/app_constants.dart';
+
+String? _fixUrl(String? url) {
+  if (url == null || url.isEmpty) return url;
+  if (url.startsWith('/')) {
+    return '${AppConstants.apiBaseUrl}$url';
+  }
+  if (url.contains('127.0.0.1:8000') || url.contains('localhost:8000')) {
+    final uri = Uri.parse(url);
+    return '${AppConstants.apiBaseUrl}${uri.path}';
+  }
+  return url;
+}
 
 class PostUser {
   final int id;
@@ -15,7 +28,7 @@ class PostUser {
     return PostUser(
       id: json['id'] as int,
       username: json['username'] as String? ?? 'Unknown',
-      profilePicture: json['profile_picture'] as String?,
+      profilePicture: _fixUrl(json['profile_picture'] as String?),
     );
   }
 }
@@ -79,7 +92,7 @@ class Post {
       id: json['id'] as int,
       title: json['title'] as String?,
       description: json['dec'] as String?,
-      media: json['media'] as String?,
+      media: _fixUrl(json['media'] as String?),
       createdAt: json['created_at'] as String? ?? '',
       updatedAt: json['updated_at'] as String? ?? '',
       postUser: json['post_user'] != null

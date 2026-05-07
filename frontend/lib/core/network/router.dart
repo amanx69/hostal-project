@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/verification_pending_screen.dart';
 import '../../features/auth/presentation/screens/verification_success_screen.dart';
 import '../../features/post/presentation/screens/create_post_screen.dart';
+import '../../features/post/presentation/screens/edit_profile_screen.dart';
 import '../../features/post/presentation/screens/feed_screen.dart';
 import '../../features/post/presentation/screens/my_profile_screen.dart';
 import '../../features/post/presentation/screens/search_screen.dart';
@@ -128,6 +130,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           0;
                       return UserProfileScreen(userId: id);
                     },
+                  ),
+                  GoRoute(
+                    path: 'edit',
+                    builder: (_, __) => const EditProfileScreen(),
                   ),
                 ],
               ),

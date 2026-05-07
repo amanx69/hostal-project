@@ -197,6 +197,49 @@ class MyProfileNotifier extends StateNotifier<ProfileState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<bool> updateProfile({
+    String? username,
+    String? bio,
+    String? location,
+    String? phoneNumber,
+    String? githubUrl,
+    String? linkedinUrl,
+    String? leetcodeUrl,
+    File? profilePicture,
+    File? coverImage,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final formData = FormData.fromMap({
+        if (username != null && username.isNotEmpty) 'username': username,
+        if (bio != null) 'bio': bio,
+        if (location != null) 'location': location,
+        if (phoneNumber != null) 'phone_number': phoneNumber,
+        if (githubUrl != null) 'github_url': githubUrl,
+        if (linkedinUrl != null) 'linkedin_url': linkedinUrl,
+        if (leetcodeUrl != null) 'leetcode_url': leetcodeUrl,
+        if (profilePicture != null) 'profile_picture': await MultipartFile.fromFile(profilePicture.path),
+        if (coverImage != null) 'profile_cover': await MultipartFile.fromFile(coverImage.path),
+      });
+
+      await _ds.updateProfile(formData);
+      await fetchProfile(); // refresh the profile
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: _parseError(e));
+      return false;
+    }
+  }
+
+  String _parseError(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map) return data.values.first.toString();
+      return e.message ?? 'Something went wrong';
+    }
+    return e.toString();
+  }
 }
 
 final myProfileProvider =

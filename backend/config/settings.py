@@ -31,6 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
 
 AUTH_USER_MODEL = "users.User"  # custom user model
 
@@ -54,7 +55,11 @@ INSTALLED_APPS = [
     'channels',
     'corsheaders',
     'django_filters',
-""
+    #for media
+    'cloudinary',
+    'cloudinary_storage',
+    
+
     ##! my apps
     "apps.users",
     'apps.post',
@@ -109,13 +114,17 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config("name"),
+        'USER': config("username"),
+        'PASSWORD': config("password"),
+        'HOST': config("host"), 
+        'PORT': config("port"),
     }
 }
-
 
 
 # Password validation
@@ -185,8 +194,8 @@ REST_FRAMEWORK = {
 }
 #! for jwt  refreh tocken  and logout  
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=100),#!  for  debuging  purpose
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=200),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),#!  for  debuging  purpose
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }

@@ -115,10 +115,10 @@ class _PostCardState extends State<PostCard>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  _MediaViewer(
+                   _MediaViewer(
                     url: post.media!,
                     isDark: isDark,
-                  ),
+                  ), 
                   // Double-tap heart overlay
                   if (_showDoubleTapHeart)
                     AnimatedBuilder(
@@ -783,9 +783,6 @@ class _MiniAvatar extends StatelessWidget {
     );
   }
 }
-
-// ─── Media Viewer ─────────────────────────────────────────────────────────────
-
 class _MediaViewer extends StatefulWidget {
   final String url;
   final bool isDark;
@@ -797,30 +794,62 @@ class _MediaViewer extends StatefulWidget {
 }
 
 class _MediaViewerState extends State<_MediaViewer> {
-  VideoPlayerController? _controller;
+
   bool _isVideo = false;
   bool _isInitialized = false;
+  VideoPlayerController? _controller;
+  bool _isPlaying = false;
+  bool _loadStarted = false;
 
   @override
   void initState() {
     super.initState();
     final lowerUrl = widget.url.toLowerCase();
     _isVideo = lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov') || lowerUrl.endsWith('.avi');
-    
-    if (_isVideo) {
-      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-        ..initialize().then((_) {
-          if (mounted) setState(() => _isInitialized = true);
-          _controller?.setLooping(true);
-          _controller?.play();
-        });
-    }
   }
 
   @override
   void dispose() {
     _controller?.dispose();
     super.dispose();
+  }
+
+  void _togglePlay() {
+    if (!_loadStarted) {
+      setState(() {
+        _loadStarted = true;
+      });
+      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _isInitialized = true;
+              _isPlaying = true;
+            });
+            _controller?.setLooping(true);
+            _controller?.play();
+          }
+        }).catchError((_) {
+          if (mounted) {
+            setState(() {
+              _loadStarted = false;
+            });
+          }
+        });
+      return;
+    }
+
+    if (_controller == null || !_isInitialized) return;
+
+    setState(() {
+      if (_controller!.value.isPlaying) {
+        _controller!.pause();
+        _isPlaying = false;
+      } else {
+        _controller!.play();
+        _isPlaying = true;
+      }
+    });
   }
 
   @override
@@ -856,18 +885,60 @@ class _MediaViewerState extends State<_MediaViewer> {
       );
     }
 
-    if (_isInitialized && _controller != null) {
-      return AspectRatio(
-        aspectRatio: _controller!.value.aspectRatio,
-        child: VideoPlayer(_controller!),
+    if (!_loadStarted) {
+      return GestureDetector(
+        onTap: _togglePlay,
+        child: Container(
+          height: 300,
+          width: double.infinity,
+          color: Colors.black87,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.play_arrow_rounded, size: 50, color: Colors.white),
+            ),
+          ),
+        ),
       );
     }
 
-    return Container(
-      height: 300,
-      color: Colors.black87,
-      child: const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+    if (!_isInitialized || _controller == null) {
+      return Container(
+        height: 300,
+        color: Colors.black87,
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: _togglePlay,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AspectRatio(
+            aspectRatio: _controller!.value.aspectRatio,
+            child: VideoPlayer(_controller!),
+          ),
+          if (!_isPlaying)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 50,
+              ),
+            ),
+        ],
       ),
     );
   }

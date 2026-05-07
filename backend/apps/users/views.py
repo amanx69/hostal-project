@@ -9,8 +9,10 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth import authenticate
 from django.utils.http import urlsafe_base64_decode
+from django.shortcuts import redirect
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from service.gernateToken import generate_verification_token
 from service.SendEmail import send_verification_email, SendWelcomeEmail
 from django.utils.decorators import method_decorator
@@ -98,7 +100,8 @@ class VerifyEmail(APIView):
                 return error_response("User not found.", http_status=status.HTTP_404_NOT_FOUND)
 
             if user.is_verified:
-                return success_response({"message": "Email is already verified."})
+                jwt_token = get_token(user)
+                return redirect(f"{settings.FRONTEND_URL}/?access={jwt_token['access']}&refresh={jwt_token['refresh']}")
 
             if not default_token_generator.check_token(user, token):
                 return error_response(
@@ -113,13 +116,7 @@ class VerifyEmail(APIView):
             cache.set(cache_key, True, timeout=172800)
 
             jwt_token = get_token(user)
-            return success_response(
-                {
-                    "message": "Email verified successfully.",
-                    "access": jwt_token["access"],
-                    "refresh": jwt_token["refresh"],
-                }
-            )
+            return redirect(f"{settings.FRONTEND_URL}/?access={jwt_token['access']}&refresh={jwt_token['refresh']}")
         except Exception as e:
             return error_response(str(e), http_status=status.HTTP_400_BAD_REQUEST)
 
