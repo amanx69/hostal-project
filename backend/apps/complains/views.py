@@ -19,7 +19,6 @@ class Createcomplain(APIView):
         ser = ComplainSerializer(data=request.data, context={"request": request})
         if ser.is_valid():
             ser.save()
-            # Invalidate the complain list cache
             cache.delete("complain_list")
             return _success(
                 {"message": "Complaint submitted successfully.", "data": ser.data},
@@ -40,8 +39,7 @@ class Createcomplain(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def patch(self, request, id):
-        # BUG FIX: original code had `complain = complain.objects.get(id=id)` which shadows
-        # the model class name, causing TypeError: 'Complain' object is not callable.
+
         try:
             instance = Complain.objects.get(id=id)
         except Complain.DoesNotExist:

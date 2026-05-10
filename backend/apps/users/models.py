@@ -35,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = "email"   # login field
-    REQUIRED_FIELDS = []   # when creating superuser
+    REQUIRED_FIELDS = []   
     read_only_fields = ["id", "email","created_at"]
 
     def __str__(self):

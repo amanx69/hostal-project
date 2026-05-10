@@ -53,8 +53,7 @@ def get_profile(request, user_id: int):
     data = {
         "success": True,
         "profile": {
-            "id": profile.id,
-            "user_id": target_user.id,
+          
             "username": profile.username,
             "email": target_user.email,
             "profile_picture": profile.profile_picture.url if profile.profile_picture else None,
@@ -81,10 +80,7 @@ def get_profile(request, user_id: int):
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_user_profile(request):
-    """
-    Profile for the currently logged-in user.
-    Short cache (30 s) keyed by user id.
-    """
+  
     cache_key = f"my_profile_{request.user.id}"
     cached = cache.get(cache_key)
     if cached:
@@ -105,8 +101,7 @@ def get_user_profile(request):
     data = {
         "success": True,
         "profile": {
-            "id": profile.id,
-            "user_id": request.user.id,
+        
             "username": profile.username,
             "email": request.user.email,
             "profile_picture": profile.profile_picture.url if profile.profile_picture else None,
@@ -139,10 +134,10 @@ class UpdateProfileView(APIView):
         profile = get_object_or_404(userProfile, user=request.user)
         ser = ProfileSerializer(profile, data=request.data, partial=True, context={"request": request})
         if ser.is_valid(raise_exception=True):
-            ser.save()
-            # Invalidate cached profiles for this user
+            #! deleted the cache for the public profile view of this user, so that next time it's requested, it will be regenerated with the updated info
             cache.delete(f"profile_{request.user.id}")
             cache.delete(f"my_profile_{request.user.id}")
+            ser.save()
             return _success(
                 {
                     "message": "Profile updated successfully.",
@@ -155,7 +150,6 @@ class UpdateProfileView(APIView):
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
 def resume_rating(request) -> Response:
-    """Rate an uploaded resume (PDF/DOCX, max 5 MB)."""
     resume = request.FILES.get("resume")
     if not resume:
         return _error("No resume file provided.", http_status=status.HTTP_400_BAD_REQUEST)

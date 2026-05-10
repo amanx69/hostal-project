@@ -22,7 +22,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     ]
 
     def validate(self, data):
-        # BUG FIX: was checking 'Bio' (capital B) — field name is 'bio', so filter never triggered.
+
         for field in ["bio", "username"]:
             value = data.get(field)
             if value:

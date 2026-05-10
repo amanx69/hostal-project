@@ -27,11 +27,7 @@ User = get_user_model()
 from service.jwt_utils import get_token
 from service.response import success_response, error_response
 
-
-# ---------------------------------------------------------------------------
-# Auth views
-# ---------------------------------------------------------------------------
-
+#! signup
 class Signup(APIView):
     throttle_scope = "signup"
 
@@ -78,10 +74,10 @@ class Login(APIView):
 
 
 class VerifyEmail(APIView):
-    """Verify a user's email address via uid + token link."""
+  
 
     def get(self, request, uid, token):
-        # -- cache check: avoid re-verifying the same token --
+
         cache_key = f"email_verify_{uid}_{token}"
         if cache.get(cache_key):
             return error_response(
@@ -122,7 +118,7 @@ class VerifyEmail(APIView):
 
 
 class ResendVerificationView(APIView):
-    """Resend the email verification link for an unverified account."""
+
 
     #! This endpoint must be public so unauthenticated users can request a resend.
     permission_classes = []
@@ -172,7 +168,7 @@ class RequestPasswordResetView(APIView):
 
 
 class ConfirmPasswordResetView(APIView):
-    """Confirm password reset using uid + token from the email link."""
+
 
     permission_classes = []  # public — user is not authenticated
 

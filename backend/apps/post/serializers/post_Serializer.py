@@ -89,4 +89,3 @@ class PostSerializer(serializers.ModelSerializer):
             follower=user, following=obj.user
         ).exists()
     
-   # compress  the  image  than save it

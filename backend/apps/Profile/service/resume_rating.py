@@ -15,10 +15,7 @@ def extract_text_from_pdf(file) -> str:
 
 
 def analyze_resume(file) -> tuple[int, str]:
-    """
-    Analyze resume file and return (score 1-10, feedback).
-    Simple heuristic-based scoring - can be replaced with ML/NLP.
-    """
+  
     # Extract text from the uploaded file
     text = extract_text_from_pdf(file)
 
