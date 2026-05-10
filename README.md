@@ -1,135 +1,117 @@
-<<<<<<< HEAD
-# 🚀 Hostal – Social Media Backend API
+# 🚀 Hostal — Social Media Backend API
 
-Hostal is a scalable social media backend built using Django and Django REST Framework (DRF).  
-It provides core social features like authentication, posts, likes, comments, and follow systems with a focus on performance, security, and clean architecture.
-
----
-
-## 🔥 Features
-
-- 🔐 JWT Authentication (Login / Signup)
-- 📧 Email Verification System
-- 👤 Custom User Model
-- 📝 Create / Update / Delete Posts (Image/Video supported)
-- ❤️ Like / Unlike Posts
-- 💬 Comment System
-- 👥 Follow / Unfollow Users
--    hostal complain features
-- implement real time chat system (in future)
-- ⚡ Background Tasks using Celery (image processing, email sending)
-- 🗜️ Image Compression & Optimization
-- 🚫 Rate Limiting (Anti-spam protection)
+Hostal is a scalable social media backend built with **Django** and **Django REST Framework (DRF)**.  
+It provides core social features like authentication, posts, likes, comments, and a follow system — with a focus on performance, security, and clean architecture.
 
 ---
 
-## 🏗️ Tech Stack
+## ✨ Features
 
-- **Backend:** Django, Django REST Framework
-- **Auth:** JWT (SimpleJWT)
-- **Database:** db.sqlite3(dev)  PostgreSQL(prod)
-- **Async Tasks:** Celery + Redis
-- **Media Handling:** Pillow / Cloud Storage (optional)
-- **Deployment Ready:** Gunicorn + Nginx(in future)
-
-
-## ⚙️ Installation
-
-python -m venv venv
-source venv/bin/activate   # Linux
-venv\Scripts\activate      # Windows
-
-### 1. Clone Repository
-
-```bash
-git clone https://github.com/amanx69/hostal-project/
-cd hostal-project
-pip install -r req.txt
-
-# than setup .env
-
-
-Sc= "gernate you sc"
-#email
-
-email_b= django.core.mail.backends.smtp.EmailBackend
-email_h= smtp.gmail.com
-email_port= 587
-email_host= "your host email"
-email_pass= "your gmail service pass not real pass"
-
-
-#! than run in bash
-python manage.py makemigrations
-python manage.py migrate
-
-#in your root project 
-python manage.py runserver
-=======
-# 🚀 Hostal – Social Media Backend API
-
-Hostal is a scalable social media backend built using Django and Django REST Framework (DRF).  
-It provides core social features like authentication, posts, likes, comments, and follow systems with a focus on performance, security, and clean architecture.
-
----
-
-## 🔥 Features
-
-- 🔐 JWT Authentication (Login / Signup)
-- 📧 Email Verification System
-- 👤 Custom User Model
-- 📝 Create / Update / Delete Posts (Image/Video supported)
-- ❤️ Like / Unlike Posts
-- 💬 Comment System
-- 👥 Follow / Unfollow Users
--    hostal complain features
-- implement real time chat system (in future)
-- ⚡ Background Tasks using Celery (image processing, email sending)
-- 🗜️ Image Compression & Optimization
-- 🚫 Rate Limiting (Anti-spam protection)
+| Category | Feature |
+|---|---|
+| 🔐 Auth | JWT Login / Signup |
+| 📧 Email | Email Verification System |
+| 👤 Users | Custom User Model |
+| 📝 Posts | Create / Update / Delete (Image & Video supported) |
+| ❤️ Engagement | Like / Unlike Posts |
+| 💬 Comments | Comment System |
+| 👥 Social | Follow / Unfollow Users |
+| 🏠 Hostal | Complaint / Report System |
+| ⚡ Tasks | Background Jobs via Celery (image processing, email sending) |
+| 🗜️ Media | Image Compression & Optimization |
+| 🚫 Security | Rate Limiting (anti-spam protection) |
+| 💬 Chat | Real-time Chat *(planned)* |
 
 ---
 
 ## 🏗️ Tech Stack
 
-- **Backend:** Django, Django REST Framework
-- **Auth:** JWT (SimpleJWT)
-- **Database:** db.sqlite3(dev)  PostgreSQL(prod)
-- **Async Tasks:** Celery + Redis
-- **Media Handling:** Pillow / Cloud Storage (optional)
-- **Deployment Ready:** Gunicorn + Nginx(in future)
+| Layer | Technology |
+|---|---|
+| **Backend** | Django, Django REST Framework |
+| **Auth** | JWT via `djangorestframework-simplejwt` |
+| **Database** | SQLite *(dev)* / PostgreSQL *(prod)* |
+| **Async Tasks** | Celery + Redis |
+| **Media** | Pillow / Cloud Storage *(optional)* |
+| **Deployment** | Gunicorn + Nginx *(planned)* |
 
+---
 
 ## ⚙️ Installation
 
-python -m venv venv
-source venv/bin/activate   # Linux
-venv\Scripts\activate      # Windows
-
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/amanx69/hostal-project/
 cd hostal-project
+```
+
+### 2. Create & Activate a Virtual Environment
+
+```bash
+python -m venv venv
+
+# Linux / macOS
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+
+```bash
 pip install -r req.txt
+```
 
-# than setup .env
+### 4. Configure Environment Variables
 
+Create a `.env` file in the root of the project and add the following:
 
-Sc= "gernate you sc"
-#email
+```env
+# Django
+SECRET_KEY=your_generated_secret_key_here
 
-email_b= django.core.mail.backends.smtp.EmailBackend
-email_h= smtp.gmail.com
-email_port= 587
-email_host= "your host email"
-email_pass= "your gmail service pass not real pass"
+# Email
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_gmail_app_password   # Use an App Password, not your real Gmail password
+```
 
+> ⚠️ **Never commit your `.env` file.** Add it to `.gitignore`.
 
-#! than run in bash
+### 5. Run Migrations
+
+```bash
 python manage.py makemigrations
 python manage.py migrate
+```
 
-#in your root project 
+### 6. Start the Development Server
+
+```bash
 python manage.py runserver
->>>>>>> 2da3bbe (work on frontend)
+```
+
+The API will be available at `http://127.0.0.1:8000/`.
+
+
+
+## 🔮 Roadmap
+
+- [x] JWT Authentication
+- [x] Email Verification
+- [x] Posts (CRUD + Media)
+- [x] Likes & Comments
+- [x] Follow System
+- [x] Hostal Complaint System
+- [x] Celery Background Tasks
+- [ ] Real-time Chat (WebSockets)
+- [ ] PostgreSQL + Production Deployment (Gunicorn + Nginx)
+- [ ] Cloud Media Storage (S3 / Cloudinary)
+
+
+
+
